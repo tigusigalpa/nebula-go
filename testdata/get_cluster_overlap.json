@@ -1,0 +1,32 @@
+{
+  "asset_classes": [
+    "equity",
+    "commodity",
+    "index",
+    "crypto"
+  ],
+  "cluster_id": "smart_money",
+  "days": 30,
+  "peers": [
+    {
+      "agreeing_asset_count": 14,
+      "cluster_id": "smart_money",
+      "compared_asset_count": 17,
+      "direction_agreement_share": 0.8235,
+      "overlap_share": 0.46,
+      "shared_assets": [
+        {
+          "asset_class": "equity",
+          "asset_id": "NVDA",
+          "cluster_stance": 0.62,
+          "market_stance": -0.18,
+          "name": "NVIDIA Corporation",
+          "peer_stance": 0.54,
+          "symbol": "NVDA"
+        }
+      ],
+      "stance_gap": 0.0812
+    }
+  ],
+  "top_asset_count": 50
+}

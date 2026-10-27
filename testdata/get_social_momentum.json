@@ -1,0 +1,15 @@
+{
+  "clusters": {
+    "smart_money": [
+      {
+        "average_sentiment_score": 38.5,
+        "bearish_posts": 41,
+        "bullish_posts": 112,
+        "neutral_posts": 31,
+        "timestamp": "2026-08-07T15:00:00Z",
+        "total_posts": 184,
+        "unique_posters": 73
+      }
+    ]
+  }
+}

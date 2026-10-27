@@ -1,0 +1,9 @@
+{
+  "query": "nvidia",
+  "results": [
+    {
+      "kind": "asset",
+      "name": "NVIDIA Corporation"
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "asset_classes": [
+    "equity",
+    "commodity",
+    "index",
+    "crypto"
+  ],
+  "cluster_id": "smart_money",
+  "gainers": [
+    {
+      "asset_class": "equity",
+      "asset_id": "NVDA",
+      "current_share": 0.0687,
+      "name": "NVIDIA Corporation",
+      "previous_share": 0.0412,
+      "share_change_bps": 275,
+      "symbol": "NVDA"
+    }
+  ],
+  "hours": 168,
+  "losers": [
+    {
+      "asset_class": "equity",
+      "asset_id": "NVDA",
+      "current_share": 0.0687,
+      "name": "NVIDIA Corporation",
+      "previous_share": 0.0412,
+      "share_change_bps": 275,
+      "symbol": "NVDA"
+    }
+  ],
+  "topic_changes": [
+    {
+      "current_share": 0.0687,
+      "share_change_bps": 275,
+      "topic": "people"
+    }
+  ],
+  "topic_series": [
+    {
+      "timestamp": "2026-09-11T00:00:00Z",
+      "topics": [
+        {
+          "topic": "people",
+          "topic_share": 0.52
+        }
+      ]
+    }
+  ]
+}

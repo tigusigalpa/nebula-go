@@ -1,0 +1,29 @@
+{
+  "asset_classes": [
+    "equity",
+    "commodity",
+    "index",
+    "crypto"
+  ],
+  "assets": [
+    {
+      "asset_class": "equity",
+      "asset_id": "NVDA",
+      "bearish_cluster_count": 14,
+      "bullish_cluster_count": 5,
+      "cluster_stances": [
+        {
+          "cluster_id": "smart_money",
+          "posts": 684,
+          "stance": -0.58
+        }
+      ],
+      "market_stance": -0.18,
+      "minority_share": 0.2632,
+      "name": "NVIDIA Corporation",
+      "stance_iqr": 0.6125,
+      "symbol": "NVDA"
+    }
+  ],
+  "days": 30
+}

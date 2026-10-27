@@ -1,0 +1,23 @@
+{
+  "active_clusters": 34,
+  "asset_classes": [
+    "equity",
+    "commodity",
+    "index",
+    "crypto"
+  ],
+  "days": 30,
+  "hype_cycles": 41,
+  "traits": [
+    {
+      "clusters": [
+        {
+          "cluster_id": "smart_money",
+          "value": 1.42
+        }
+      ],
+      "trait": "earliness",
+      "unit": "days"
+    }
+  ]
+}

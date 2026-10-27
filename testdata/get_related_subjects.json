@@ -1,0 +1,25 @@
+{
+  "authors": 241,
+  "average_sentiment_score": 36.2,
+  "from": "2026-08-15T09:00:00Z",
+  "hours": 168,
+  "posts": 684,
+  "subjects": [
+    {
+      "authors": 73,
+      "bearish_posts": 41,
+      "bullish_posts": 112,
+      "name": "Artificial Intelligence",
+      "neutral_posts": 31,
+      "posts": 184,
+      "posts_delta": 0.556,
+      "posts_prior": 72,
+      "posts_recent": 112,
+      "sentiment_delta": 8.4,
+      "sentiment_score": 42.6,
+      "share": 0.148,
+      "subject_id": "text:artificial intelligence"
+    }
+  ],
+  "to": "2026-08-22T09:00:00Z"
+}

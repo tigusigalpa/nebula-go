@@ -1,0 +1,31 @@
+{
+  "as_of": "2026-09-14T09:15:00Z",
+  "chance_higher_72h": 0.63,
+  "current_share": 0.0498,
+  "horizon_hours": 72,
+  "likely_high_share": 0.1022,
+  "likely_low_share": 0.0331,
+  "reason": "too_little_history",
+  "refreshed": false,
+  "sample_paths": [
+    [
+      0.0515
+    ]
+  ],
+  "series": [
+    {
+      "mean_share": 0.0512,
+      "p10_share": 0.05,
+      "p25_share": 0.05,
+      "p50_share": 0.05,
+      "p75_share": 0.05,
+      "p90_share": 0.05,
+      "quantile_shares": [
+        0.0502
+      ],
+      "timestamp": "2026-09-14T13:15:00Z"
+    }
+  ],
+  "status": "ok",
+  "takeoff_chance_72h": 0.21
+}

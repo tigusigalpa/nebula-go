@@ -1,0 +1,13 @@
+{
+  "assets": [
+    {
+      "asset_class": "equity",
+      "asset_id": "NVDA",
+      "name": "NVIDIA Corporation",
+      "symbol": "NVDA"
+    }
+  ],
+  "has_more": false,
+  "limit": 50,
+  "offset": 0
+}

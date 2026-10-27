@@ -1,0 +1,11 @@
+{
+  "has_more": false,
+  "limit": 50,
+  "offset": 0,
+  "subjects": [
+    {
+      "name": "Artificial Intelligence",
+      "subject_id": "text:artificial intelligence"
+    }
+  ]
+}

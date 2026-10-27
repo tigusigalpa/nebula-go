@@ -1,0 +1,64 @@
+{
+  "as_of": "2026-09-14T09:15:00Z",
+  "chance_higher_24h": 0.74,
+  "chance_higher_24h_confident": true,
+  "chance_higher_72h": 0.61,
+  "chance_higher_72h_confident": false,
+  "current_sentiment_signal": 128.6,
+  "horizon_hours": 72,
+  "reason": "too_little_history",
+  "refreshed": false,
+  "sample_paths": [
+    [
+      133.2
+    ]
+  ],
+  "series": [
+    {
+      "bearish_posts": {
+        "mean": 18,
+        "p10": 9.9,
+        "p25": 13.5,
+        "p50": 17.1,
+        "p75": 21.6,
+        "p90": 27.9
+      },
+      "bullish_posts": {
+        "mean": 46,
+        "p10": 25.3,
+        "p25": 34.5,
+        "p50": 43.7,
+        "p75": 55.2,
+        "p90": 71.3
+      },
+      "neutral_posts": {
+        "mean": 29,
+        "p10": 16,
+        "p25": 21.8,
+        "p50": 27.6,
+        "p75": 34.8,
+        "p90": 45
+      },
+      "sentiment_signal": {
+        "mean": 131.4,
+        "p10": 129.6,
+        "p50": 129.6,
+        "p90": 129.6,
+        "quantiles": [
+          130.5
+        ]
+      },
+      "timestamp": "2026-09-14T13:15:00Z",
+      "total_posts": {
+        "mean": 93,
+        "p10": 51.2,
+        "p25": 69.8,
+        "p50": 88.4,
+        "p75": 111.6,
+        "p90": 144.2
+      }
+    }
+  ],
+  "status": "ok",
+  "turning": 0
+}

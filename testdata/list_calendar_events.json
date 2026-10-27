@@ -1,0 +1,48 @@
+{
+  "calendar_events": [
+    {
+      "calendar_event_id": "earnings:nvda:2026-q3",
+      "confidence_score": 9,
+      "created_at": "2026-08-06T10:00:00Z",
+      "domains": [
+        "equities",
+        "technology"
+      ],
+      "entities": [
+        {
+          "entity_id": "eq:NVDA",
+          "is_primary": true,
+          "name": "NVIDIA Corporation",
+          "role": "affected"
+        }
+      ],
+      "event_type": "earnings",
+      "importance_score": 3,
+      "long_term_impact_score": 2,
+      "macro_impact_score": 1,
+      "price_impact_score": 3,
+      "short_term_impact_score": 3,
+      "source_count": 4,
+      "sources": [
+        {
+          "external_id": "0001045810-26-000123",
+          "published_at": "2026-08-07T14:30:00Z",
+          "source": "sec",
+          "subtype": "filing",
+          "trusted": true
+        }
+      ],
+      "start_time": "2026-08-20T20:00:00Z",
+      "status": "scheduled",
+      "tags": [
+        "earnings",
+        "data_centres"
+      ],
+      "tail_risk_impact_score": 1,
+      "time_precision": "exact",
+      "title": "NVIDIA Q3 2026 earnings",
+      "trusted_source_count": 3,
+      "updated_at": "2026-08-07T14:35:00Z"
+    }
+  ]
+}

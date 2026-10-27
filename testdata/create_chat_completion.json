@@ -1,0 +1,11 @@
+{
+  "choices": [
+    {
+      "index": 0
+    }
+  ],
+  "created": 1786114800,
+  "id": "chatcmpl_nebula_01",
+  "model": "nebula-agent",
+  "object": "chat.completion"
+}

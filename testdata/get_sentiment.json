@@ -1,0 +1,24 @@
+{
+  "cohorts": {
+    "bots": [
+      {
+        "bearish_posts": 438,
+        "bullish_posts": 1120,
+        "neutral_posts": 284,
+        "sentiment_signal": 128.6,
+        "timestamp": "2026-08-07T15:00:00Z",
+        "total_posts": 1842
+      }
+    ]
+  },
+  "series": [
+    {
+      "bearish_posts": 438,
+      "bullish_posts": 1120,
+      "neutral_posts": 284,
+      "sentiment_signal": 128.6,
+      "timestamp": "2026-08-07T15:00:00Z",
+      "total_posts": 1842
+    }
+  ]
+}

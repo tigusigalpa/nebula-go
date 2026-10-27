@@ -1,0 +1,32 @@
+{
+  "asset_classes": [
+    "equity",
+    "commodity",
+    "index",
+    "crypto"
+  ],
+  "cycles": [
+    {
+      "arrivals": [
+        {
+          "cluster_id": "smart_money",
+          "offset_hours": -3.2,
+          "posts": 684
+        }
+      ],
+      "asset_class": "equity",
+      "asset_id": "NVDA",
+      "name": "NVIDIA Corporation",
+      "peak_day_posts": 930,
+      "peak_timestamp": "2026-09-10T14:00:00Z",
+      "series": [
+        {
+          "posts": 684,
+          "timestamp": "2026-09-10T14:00:00Z"
+        }
+      ],
+      "symbol": "NVDA"
+    }
+  ],
+  "days": 30
+}

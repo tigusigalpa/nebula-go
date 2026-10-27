@@ -1,0 +1,24 @@
+{
+  "clusters": [
+    {
+      "bearish_posts": 438,
+      "bullish_posts": 1120,
+      "cluster_id": "smart_money",
+      "neutral_posts": 284,
+      "previous_total_posts": 1556,
+      "recent_sentiment_signal": 84.2,
+      "series": [
+        {
+          "bearish_posts": 438,
+          "bullish_posts": 1120,
+          "sentiment_signal": 128.6,
+          "timestamp": "2026-08-07T15:00:00Z",
+          "total_posts": 1842
+        }
+      ],
+      "total_posts": 1842,
+      "window_sentiment_signal": 63.7
+    }
+  ],
+  "hours": 168
+}

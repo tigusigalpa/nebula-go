@@ -1,0 +1,19 @@
+{
+  "average_return_pct": 4.1,
+  "buckets": [
+    {
+      "call_count": 91,
+      "capped_total_aligned_return_pct": -228,
+      "label": "-10% to 0%",
+      "lower_bound_pct": -10,
+      "total_aligned_return_pct": -342.5,
+      "upper_bound_pct": 0
+    }
+  ],
+  "losses": 174,
+  "median_return_pct": 2.8,
+  "resolved_calls": 412,
+  "resolved_days": 7,
+  "win_rate_pct": 57.77,
+  "wins": 238
+}

@@ -1,0 +1,28 @@
+{
+  "active_clusters": 34,
+  "asset_classes": [
+    "equity",
+    "commodity",
+    "index",
+    "crypto"
+  ],
+  "cluster_id": "smart_money",
+  "days": 30,
+  "hype_cycles": 41,
+  "traits": [
+    {
+      "peer_values": [
+        -1.8,
+        -0.64,
+        0.12,
+        0.87,
+        2.05
+      ],
+      "percentile": 0.9394,
+      "rank": 3,
+      "trait": "earliness",
+      "unit": "days",
+      "value": 1.42
+    }
+  ]
+}

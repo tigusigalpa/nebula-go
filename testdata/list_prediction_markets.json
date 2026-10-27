@@ -1,0 +1,71 @@
+{
+  "has_more": false,
+  "limit": 50,
+  "markets": [
+    {
+      "entities": [
+        {
+          "name": "NVIDIA"
+        }
+      ],
+      "id": "polymarket:123",
+      "listings": [
+        {
+          "closes_at": "2026-10-07T20:00:00Z",
+          "event_id": "event-123",
+          "id": "polymarket:123",
+          "liquidity_usd": 5000,
+          "market_id": "polymarket:123",
+          "observed_at": "2026-10-06T12:00:00Z",
+          "open_interest": 100,
+          "opens_at": "2026-10-01T00:00:00Z",
+          "outcomes": [
+            {
+              "ask": 0.66,
+              "bid": 0.64,
+              "id": "polymarket:123",
+              "label": "Yes",
+              "last_trade": 0.64,
+              "midpoint": 0.65,
+              "position": 0,
+              "price": 0.65,
+              "price_basis": "midpoint",
+              "provider_price": 0.65
+            }
+          ],
+          "provider": "polymarket",
+          "provider_id": "123",
+          "provider_updated_at": "2026-10-06T12:00:00Z",
+          "question": "Will NVIDIA close above $200 on October 7?",
+          "resolution_source": "Official exchange close",
+          "resolves_at": "2026-10-08T00:00:00Z",
+          "result": "yes",
+          "revision": "revision-hash",
+          "rules": "Resolves Yes if the official closing price exceeds $200.",
+          "source_url": "https://polymarket.com/event/example",
+          "status": "open",
+          "volume": 10000,
+          "volume_24h": 1000,
+          "volume_unit": "usd"
+        }
+      ],
+      "question": "Will NVIDIA close above $200 on October 7?",
+      "subjects": [
+        {
+          "fallback_image_urls": [
+            "string"
+          ],
+          "image_url": "https://example.com/nvda.png",
+          "name": "NVIDIA",
+          "role": "entity",
+          "status": "open",
+          "subject_id": "eq:NVDA",
+          "types": [
+            "string"
+          ]
+        }
+      ]
+    }
+  ],
+  "offset": 0
+}

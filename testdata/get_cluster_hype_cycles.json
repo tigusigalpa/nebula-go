@@ -1,0 +1,28 @@
+{
+  "asset_classes": [
+    "equity",
+    "commodity",
+    "index",
+    "crypto"
+  ],
+  "cluster_id": "smart_money",
+  "clusters": [
+    {
+      "cluster_id": "smart_money",
+      "cycles_joined": 27,
+      "lead_days": 0.0125,
+      "lead_high_days": 0.0292,
+      "lead_low_days": -0.0083
+    }
+  ],
+  "curve": [
+    {
+      "cluster_cumulative_pct": 24.6,
+      "day_offset": -3,
+      "market_cumulative_pct": 15.3
+    }
+  ],
+  "cycles_joined": 27,
+  "days": 30,
+  "lead_days": 0.0125
+}

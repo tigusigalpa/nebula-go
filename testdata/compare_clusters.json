@@ -1,0 +1,34 @@
+{
+  "asset_classes": [
+    "equity",
+    "commodity",
+    "index",
+    "crypto"
+  ],
+  "clusters": [
+    {
+      "activity_change_pct": 18.4,
+      "bearish_posts": 438,
+      "bullish_posts": 1120,
+      "cluster_bullish_share": 0.8188,
+      "cluster_id": "smart_money",
+      "market_bullish_share": 0.7812,
+      "posts": 684,
+      "series": [
+        {
+          "bearish_posts": 438,
+          "bullish_posts": 1120,
+          "posts": 684,
+          "timestamp": "2026-09-12T00:00:00Z"
+        }
+      ],
+      "trending_asset": {
+        "asset_class": "equity",
+        "asset_id": "NVDA",
+        "name": "NVIDIA Corporation",
+        "symbol": "NVDA"
+      }
+    }
+  ],
+  "days": 30
+}

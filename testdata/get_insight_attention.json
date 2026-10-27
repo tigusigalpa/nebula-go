@@ -1,0 +1,63 @@
+{
+  "attention": {
+    "anchor_subject_id": "eq:NVDA",
+    "authors": 241,
+    "average_sentiment_score": 38.5,
+    "bearish_posts": 438,
+    "bucket_hours": 1,
+    "buckets": [
+      {
+        "authors": 241,
+        "average_sentiment_score": 38.5,
+        "bearish_posts": 438,
+        "bullish_posts": 1120,
+        "neutral_posts": 284,
+        "posts": 684,
+        "timestamp": "2026-08-07T15:00:00Z"
+      }
+    ],
+    "bullish_posts": 1120,
+    "cluster_mix": [
+      {
+        "authors": 241,
+        "cluster_id": "smart_money",
+        "share": 0.148
+      }
+    ],
+    "clusters": 4,
+    "from": "2026-08-15T09:00:00Z",
+    "neutral_posts": 284,
+    "optional_subjects": [
+      "string"
+    ],
+    "posts": 684,
+    "required_subjects": [
+      "string"
+    ],
+    "subjects_used": [
+      "string"
+    ],
+    "to": "2026-08-22T09:00:00Z",
+    "window_kind": "around"
+  },
+  "insight_id": 38421,
+  "price_reactions": [
+    {
+      "insight_at": "2026-08-20T20:00:00Z",
+      "insight_id": 38421,
+      "moves": [
+        {
+          "change_pct": 2.4,
+          "hours": 168
+        }
+      ],
+      "series": [
+        {
+          "change_pct": 2.4,
+          "timestamp": "2026-08-07T15:00:00Z"
+        }
+      ],
+      "subject_id": "text:artificial intelligence"
+    }
+  ]
+}

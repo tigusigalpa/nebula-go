@@ -1,0 +1,23 @@
+{
+  "asset_classes": [
+    "equity",
+    "commodity",
+    "index",
+    "crypto"
+  ],
+  "assets": [
+    {
+      "asset_class": "equity",
+      "asset_id": "NVDA",
+      "cluster_posts": 214,
+      "cluster_stance": 0.62,
+      "market_stance": -0.18,
+      "name": "NVIDIA Corporation",
+      "symbol": "NVDA"
+    }
+  ],
+  "cluster_id": "smart_money",
+  "contrarian_share": 0.1875,
+  "days": 30,
+  "peer_average_contrarian_share": 0.1123
+}

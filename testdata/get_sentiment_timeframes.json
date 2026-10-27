@@ -1,0 +1,16 @@
+{
+  "current": {
+    "long_term": 52.1,
+    "medium_term": 57.8,
+    "short_term": 64.2
+  },
+  "series": {
+    "short_term": [
+      {
+        "sentiment_signal": 64.2,
+        "timestamp": "2026-08-07T15:00:00Z",
+        "total_posts": 318
+      }
+    ]
+  }
+}

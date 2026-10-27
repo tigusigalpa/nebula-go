@@ -1,0 +1,11 @@
+event: message
+data: {"id":"chatcmpl_nebula_01","object":"chat.completion.chunk","created":1786114800,"model":"nebula-agent","choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null}]}
+
+event: message
+data: {"id":"chatcmpl_nebula_01","object":"chat.completion.chunk","created":1786114800,"model":"nebula-agent","choices":[{"index":0,"delta":{"content":"NVIDIA sentiment strengthened"},"finish_reason":null}]}
+
+event: message
+data: {"id":"chatcmpl_nebula_01","object":"chat.completion.chunk","created":1786114800,"model":"nebula-agent","choices":[{"index":0,"delta":{},"finish_reason":"stop"}],"usage":{"credits_used":3}}
+
+data: [DONE]
+

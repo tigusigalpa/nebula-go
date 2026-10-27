@@ -1,0 +1,25 @@
+{
+  "bins": [
+    {
+      "balance_score": 0.64,
+      "bearish_posts": 438,
+      "bearish_share": 0.32,
+      "bullish_posts": 1120,
+      "bullish_share": 0.68,
+      "compression_score": 0.78,
+      "is_point_of_control": true,
+      "neutral_posts": 284,
+      "price_high_usd": 180,
+      "price_low_usd": 175,
+      "price_mid_usd": 177.5,
+      "significance_score": 0.87,
+      "total_posts": 1842,
+      "total_share": 0.82,
+      "visit_count": 6
+    }
+  ],
+  "maximum_posts_in_bin": 286,
+  "maximum_price_usd": 188.75,
+  "minimum_price_usd": 161.25,
+  "total_posts": 1842
+}

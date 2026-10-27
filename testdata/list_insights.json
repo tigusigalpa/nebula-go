@@ -1,0 +1,31 @@
+{
+  "insights": [
+    {
+      "domains": [
+        "equities",
+        "technology"
+      ],
+      "entities": [
+        {
+          "entity_id": "eq:NVDA",
+          "entity_types": [
+            "equity"
+          ],
+          "is_direct": true,
+          "is_primary": true,
+          "name": "NVIDIA Corporation",
+          "role": "primary"
+        }
+      ],
+      "headline": "NVIDIA raises its quarterly revenue outlook",
+      "importance_score": 3,
+      "insight_id": 38421,
+      "sentiment_score": 1,
+      "summary": "Management raised guidance after stronger-than-expected data-centre demand.",
+      "tags": [
+        "earnings",
+        "data_centres"
+      ]
+    }
+  ]
+}
