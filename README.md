@@ -3,9 +3,13 @@
 ![Nebula Golang Client/SDK/Library](https://i.postimg.cc/057CJ44Z/nebula-go-hero.jpg)
 
 [![CI](https://github.com/tigusigalpa/nebula-go/actions/workflows/ci.yml/badge.svg)](https://github.com/tigusigalpa/nebula-go/actions/workflows/ci.yml)
-[![Go Reference](https://pkg.go.dev/badge/github.com/tigusigalpa/nebula-go.svg)](https://pkg.go.dev/github.com/tigusigalpa/nebula-go)
+[![Tests](https://img.shields.io/badge/tests-go%20test%20--race-brightgreen)](https://github.com/tigusigalpa/nebula-go/actions/workflows/ci.yml)
+[![Go vet](https://img.shields.io/badge/code%20analysis-go%20vet-brightgreen)](https://github.com/tigusigalpa/nebula-go/actions/workflows/ci.yml)
+[![Go Version](https://img.shields.io/badge/go-1.21+-blue.svg)](https://golang.org)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![CodeQL](https://github.com/tigusigalpa/nebula-go/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/tigusigalpa/nebula-go/actions/workflows/codeql.yml)
+[![codecov](https://codecov.io/gh/tigusigalpa/nebula-go/graph/badge.svg)](https://codecov.io/gh/tigusigalpa/nebula-go)
 [![Version](https://img.shields.io/github/v/tag/tigusigalpa/nebula-go?label=version)](https://github.com/tigusigalpa/nebula-go/tags)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 **Explore market conversations with Go.** `nebula-go` is a client for the [Nebula Public API](https://docs.hiddensystems.ai/nebula/): find an asset, follow changes in sentiment and attention, compare communities, explore prediction markets, or ask Nebula Agent to put the data into words.
 
