@@ -136,6 +136,7 @@ func (e *TransportError) Error() string {
 
 func (e *TransportError) Unwrap() error { return e.Err }
 
+// Is reports whether target is ErrTransport, for use with errors.Is.
 func (e *TransportError) Is(target error) bool { return target == ErrTransport }
 
 // DecodeError means a successful HTTP response did not contain the expected JSON.
@@ -159,7 +160,9 @@ type PaymentUncertainError struct {
 func (e *PaymentUncertainError) Error() string {
 	return "nebula: x402 payment state uncertain; reconcile the original request before retrying"
 }
-func (e *PaymentUncertainError) Unwrap() error        { return e.Err }
+func (e *PaymentUncertainError) Unwrap() error { return e.Err }
+
+// Is reports whether target is ErrPaymentUncertain, for use with errors.Is.
 func (e *PaymentUncertainError) Is(target error) bool { return target == ErrPaymentUncertain }
 
 // StreamError terminates a chat stream abnormally (malformed event, transport

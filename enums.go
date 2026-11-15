@@ -18,6 +18,7 @@ package nebula
 // locale works without a new SDK release.
 type Locale string
 
+// Locales supported by the pinned Nebula API contract.
 const (
 	LocaleSpanish  Locale = "es"
 	LocaleItalian  Locale = "it"

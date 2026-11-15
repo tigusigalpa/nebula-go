@@ -8,7 +8,7 @@ import (
 )
 
 // Version is the SDK release.
-const Version = "0.3.0"
+const Version = "0.3.1"
 
 // BaseURL is the account-authenticated API base.
 const BaseURL = "https://nebula-api.hiddensystems.ai/api/v1/public"
@@ -174,15 +174,35 @@ type service struct {
 	client *Client
 }
 
-// Service group structs.
+// DiscoveryService screens assets and subjects and finds trending conversations.
 type DiscoveryService struct{ *service }
+
+// LookupService resolves assets, people and topics to their API identifiers.
 type LookupService struct{ *service }
+
+// SocialService provides sentiment, emotions, mindshare and social momentum.
 type SocialService struct{ *service }
+
+// ForecastsService lists forecast candidates and retrieves forecasts.
 type ForecastsService struct{ *service }
+
+// MarketSentimentService provides calls, market indices and price-level signals.
 type MarketSentimentService struct{ *service }
+
+// MarketDataService retrieves historical market prices.
 type MarketDataService struct{ *service }
+
+// IntelligenceService provides calendar events, insights and attention data.
 type IntelligenceService struct{ *service }
+
+// ClustersService retrieves and compares community analytics.
 type ClustersService struct{ *service }
+
+// AgentService creates chat completions and streams Agent responses.
 type AgentService struct{ *service }
+
+// AccountService retrieves the account plan, limits and credit balance.
 type AccountService struct{ *service }
+
+// PredictionsService retrieves prediction markets, listings and outcome history.
 type PredictionsService struct{ *service }

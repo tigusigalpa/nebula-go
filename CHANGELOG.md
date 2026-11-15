@@ -5,6 +5,11 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-11-15
+
+### Fixed
+- Add GoDoc comments for public service types, locale constants, error matching methods and legacy compatibility types so `golint ./...` passes without warnings.
+
 ## [0.3.0] - 2026-11-15
 
 ### Added

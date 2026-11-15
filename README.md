@@ -41,7 +41,7 @@ From your Go module:
 go get github.com/tigusigalpa/nebula-go
 ```
 
-Requires **Go 1.24 or newer**, including the module's x402 dependency graph. The SDK version declared in this source tree is `0.3.0`. The core package does not import the payment adapter; the adapter's dependencies are still declared in the same module.
+Requires **Go 1.24 or newer**, including the module's x402 dependency graph. The SDK version declared in this source tree is `0.3.1`. The core package does not import the payment adapter; the adapter's dependencies are still declared in the same module.
 
 Make your API key available to your application. For a local session, set an environment variable:
 
@@ -175,7 +175,7 @@ Use these options to adjust the defaults for your application:
 | Backoff | 250 ms initial delay, 5 s cap, with jitter | `WithRetry` or `WithRetryPolicy` |
 | Locale | Unset; uses the server default | `WithLocale` |
 | Locale transport | `X-Nebula-Locale` header | `WithLocaleMode` |
-| User agent | `nebula-go/0.3.0` | `WithUserAgent` |
+| User agent | `nebula-go/0.3.1` | `WithUserAgent` |
 | Debug logging | Off | `WithLogger` |
 
 Bearer mode sends `Authorization: Bearer …` instead of `X-API-Key`. JSON calls use `Accept: application/json`; Agent streams request `text/event-stream`.
