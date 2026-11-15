@@ -249,14 +249,34 @@ func TestStreamCancelWithFullEventBuffer(t *testing.T) {
 	}
 }
 
+// The body waits on the request deadline without spending the test's short
+// timeout establishing a loopback connection on a busy machine.
+type contextStreamBody struct{ ctx context.Context }
+
+func (b contextStreamBody) Read([]byte) (int, error) {
+	<-b.ctx.Done()
+	return 0, b.ctx.Err()
+}
+
+func (contextStreamBody) Close() error { return nil }
+
 func TestStreamTimeoutAndContentType(t *testing.T) {
-	c, closeServer := newTestClient(t, func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "text/event-stream")
-		w.WriteHeader(http.StatusOK)
-		w.(http.Flusher).Flush()
-		<-r.Context().Done()
-	}, WithTimeout(40*time.Millisecond))
-	defer closeServer()
+	c, err := New("test-key", WithTimeout(40*time.Millisecond), WithHTTPClient(&http.Client{
+		Transport: roundTripFunc(func(r *http.Request) (*http.Response, error) {
+			if _, ok := r.Context().Deadline(); !ok {
+				return nil, errors.New("stream request has no deadline")
+			}
+			return &http.Response{
+				StatusCode: http.StatusOK,
+				Header:     http.Header{"Content-Type": {"text/event-stream"}},
+				Body:       contextStreamBody{ctx: r.Context()},
+				Request:    r,
+			}, nil
+		}),
+	}))
+	if err != nil {
+		t.Fatal(err)
+	}
 	s, err := c.Agent.StreamChatCompletion(context.Background(), streamRequest())
 	if err != nil {
 		t.Fatal(err)
