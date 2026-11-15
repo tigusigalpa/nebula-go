@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // ResponseMetadata carries the HTTP context of an API response: status,
@@ -24,7 +25,8 @@ type ResponseMetadata struct {
 	RateLimitRemaining *int
 	// RateLimitReset is the seconds until the window resets.
 	RateLimitReset *int
-	// RetryAfterSeconds is the server hint on 429/503 responses.
+	// RetryAfterSeconds is the non-negative server delay on 429/503 responses.
+	// HTTP dates are converted to seconds, rounding up.
 	RetryAfterSeconds *int
 
 	// CreditsCharged is the number of credits the request cost (0 on errors).
@@ -52,6 +54,10 @@ func (b *BaseResponse) setMetadata(m ResponseMetadata) { b.Metadata = m }
 
 func (b *BaseResponse) setRaw(raw map[string]any) { b.Raw = raw }
 
+// HTTPMetadata returns the HTTP context consistently, including for responses
+// whose JSON body has its own Metadata field (such as Emotions).
+func (b *BaseResponse) HTTPMetadata() ResponseMetadata { return b.Metadata }
+
 func parseMetadata(status int, h http.Header) ResponseMetadata {
 	m := ResponseMetadata{
 		StatusCode:     status,
@@ -60,23 +66,26 @@ func parseMetadata(status int, h http.Header) ResponseMetadata {
 		PaymentReceipt: paymentReceipt(h),
 	}
 	if v := h.Get("RateLimit-Limit"); v != "" {
-		if n, err := strconv.Atoi(strings.TrimSpace(v)); err == nil {
+		if n, err := strconv.Atoi(strings.TrimSpace(v)); err == nil && n >= 0 {
 			m.RateLimitLimit = &n
 		}
 	}
 	if v := h.Get("RateLimit-Remaining"); v != "" {
-		if n, err := strconv.Atoi(strings.TrimSpace(v)); err == nil {
+		if n, err := strconv.Atoi(strings.TrimSpace(v)); err == nil && n >= 0 {
 			m.RateLimitRemaining = &n
 		}
 	}
 	if v := h.Get("RateLimit-Reset"); v != "" {
-		if n, err := strconv.Atoi(strings.TrimSpace(v)); err == nil {
+		if n, err := strconv.Atoi(strings.TrimSpace(v)); err == nil && n >= 0 {
 			m.RateLimitReset = &n
 		}
 	}
 	if v := h.Get("Retry-After"); v != "" {
-		if n, err := strconv.Atoi(strings.TrimSpace(v)); err == nil {
+		if n, err := strconv.Atoi(strings.TrimSpace(v)); err == nil && n >= 0 {
 			m.RetryAfterSeconds = &n
+		} else if date, err := http.ParseTime(v); err == nil {
+			seconds := max(0, int(time.Until(date).Seconds()+0.999999999))
+			m.RetryAfterSeconds = &seconds
 		}
 	}
 	if v := h.Get("X-Credits-Charged"); v != "" {
@@ -90,6 +99,15 @@ func parseMetadata(status int, h http.Header) ResponseMetadata {
 		}
 	}
 	return m
+}
+
+// secondsDelay saturates instead of overflowing a duration from an HTTP header.
+func secondsDelay(seconds int) time.Duration {
+	const maxSeconds = int64((1<<63 - 1) / int64(time.Second))
+	if int64(seconds) > maxSeconds {
+		return time.Duration(1<<63 - 1)
+	}
+	return time.Duration(max(0, seconds)) * time.Second
 }
 
 func paymentReceipt(h http.Header) []byte {

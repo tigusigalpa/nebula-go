@@ -138,6 +138,30 @@ func (e *TransportError) Unwrap() error { return e.Err }
 
 func (e *TransportError) Is(target error) bool { return target == ErrTransport }
 
+// DecodeError means a successful HTTP response did not contain the expected JSON.
+type DecodeError struct {
+	Op  string
+	Err error
+}
+
+func (e *DecodeError) Error() string { return fmt.Sprintf("nebula: %s: %v", e.Op, e.Err) }
+func (e *DecodeError) Unwrap() error { return e.Err }
+
+// PaymentUncertainError retains the request identity and any settlement receipt
+// when a signed payment request fails. Reconcile it before paying again.
+type PaymentUncertainError struct {
+	Op       string
+	URL      string
+	Metadata ResponseMetadata
+	Err      error
+}
+
+func (e *PaymentUncertainError) Error() string {
+	return "nebula: x402 payment state uncertain; reconcile the original request before retrying"
+}
+func (e *PaymentUncertainError) Unwrap() error        { return e.Err }
+func (e *PaymentUncertainError) Is(target error) bool { return target == ErrPaymentUncertain }
+
 // StreamError terminates a chat stream abnormally (malformed event, transport
 // drop, or an API error frame).
 type StreamError struct {

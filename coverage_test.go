@@ -1,5 +1,5 @@
-// Code generated from resources/openapi/nebula-openapi.json (OpenAPI 3.0.3, info.version 1.0.2).
-// Do not edit by hand: regenerate with tools/nebula-gen.
+// Service-call matrix for the pinned Nebula Public API contract.
+// Field-level request/response audits live in the contract test files.
 
 package nebula
 
@@ -13,178 +13,196 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
-	"time"
 )
 
-// TestCoverage exercises every one of the 41 API operations against an
-// httptest server: it verifies the request path, auth, serialization and
-// typed fixture decoding.
-func TestCoverage(t *testing.T) {
-	type step struct {
-		op   string
-		path string
-		call func(t *testing.T, c *Client) error
+// coverageStep shares actual typed service calls with the fixture audits.
+type coverageStep struct {
+	op   string
+	path string
+	call func(*testing.T, *Client) (any, error)
+}
+
+func coverageSteps(ctx context.Context) []coverageStep {
+	return []coverageStep{
+		{op: "screener", path: "/screener", call: func(t *testing.T, c *Client) (any, error) {
+			return c.Discovery.Screener(ctx, &ScreenerRequest{Kind: KindPtr(KindAsset)})
+		}},
+		{op: "get_top_momentum", path: "/top-momentum", call: func(t *testing.T, c *Client) (any, error) {
+			return c.Discovery.TopMomentum(ctx, &TopMomentumRequest{})
+		}},
+		{op: "get_top_trending", path: "/top-trending", call: func(t *testing.T, c *Client) (any, error) {
+			return c.Discovery.TopTrending(ctx, &TopTrendingRequest{})
+		}},
+		{op: "list_assets", path: "/assets", call: func(t *testing.T, c *Client) (any, error) {
+			return c.Lookup.ListAssets(ctx, &ListAssetsRequest{Query: StringPtr("NVIDIA")})
+		}},
+		{op: "search", path: "/search", call: func(t *testing.T, c *Client) (any, error) {
+			return c.Lookup.Search(ctx, &SearchRequest{Query: "NVIDIA"})
+		}},
+		{op: "list_subjects", path: "/subjects", call: func(t *testing.T, c *Client) (any, error) {
+			return c.Lookup.ListSubjects(ctx, &ListSubjectsRequest{Query: StringPtr("nvidia")})
+		}},
+		{op: "get_emotions", path: "/emotions", call: func(t *testing.T, c *Client) (any, error) {
+			return c.Social.Emotions(ctx, &EmotionsRequest{Asset: &AssetRef{ID: "NVDA", Class: AssetClassEquity}})
+		}},
+		{op: "get_mindshare", path: "/mindshare", call: func(t *testing.T, c *Client) (any, error) {
+			return c.Social.Mindshare(ctx, &MindshareRequest{Subject: &SubjectRef{ID: "subject_1"}})
+		}},
+		{op: "get_related_subjects", path: "/related-subjects", call: func(t *testing.T, c *Client) (any, error) {
+			return c.Social.RelatedSubjects(ctx, &RelatedSubjectsRequest{Asset: &AssetRef{ID: "NVDA", Class: AssetClassEquity}})
+		}},
+		{op: "get_sentiment", path: "/sentiment", call: func(t *testing.T, c *Client) (any, error) {
+			return c.Social.Sentiment(ctx, &SentimentRequest{Asset: &AssetRef{ID: "NVDA", Class: AssetClassEquity}, Hours: IntPtr(168)})
+		}},
+		{op: "get_sentiment_timeframes", path: "/sentiment/timeframes", call: func(t *testing.T, c *Client) (any, error) {
+			return c.Social.SentimentTimeframes(ctx, &SentimentTimeframesRequest{Subject: &SubjectRef{ID: "subject_1"}})
+		}},
+		{op: "get_social_momentum", path: "/social-momentum", call: func(t *testing.T, c *Client) (any, error) {
+			return c.Social.SocialMomentum(ctx, &SocialMomentumRequest{Asset: &AssetRef{ID: "NVDA", Class: AssetClassEquity}})
+		}},
+		{op: "list_forecast_assets", path: "/forecasts/assets", call: func(t *testing.T, c *Client) (any, error) {
+			return c.Forecasts.ListAssets(ctx, &ForecastAssetsRequest{})
+		}},
+		{op: "get_mindshare_forecast", path: "/forecasts/mindshare", call: func(t *testing.T, c *Client) (any, error) {
+			return c.Forecasts.Mindshare(ctx, &MindshareForecastRequest{Asset: &AssetRef{ID: "NVDA", Class: AssetClassEquity}})
+		}},
+		{op: "get_sentiment_forecast", path: "/forecasts/sentiment", call: func(t *testing.T, c *Client) (any, error) {
+			return c.Forecasts.Sentiment(ctx, &SentimentForecastRequest{Asset: &AssetRef{ID: "NVDA", Class: AssetClassEquity}})
+		}},
+		{op: "get_calls", path: "/calls", call: func(t *testing.T, c *Client) (any, error) {
+			return c.MarketSentiment.Calls(ctx, &CallsRequest{Clusters: []string{"kols", "media"}})
+		}},
+		{op: "get_call_returns", path: "/calls/returns", call: func(t *testing.T, c *Client) (any, error) {
+			return c.MarketSentiment.CallReturns(ctx, &CallReturnsRequest{})
+		}},
+		{op: "get_conviction_index", path: "/conviction-index", call: func(t *testing.T, c *Client) (any, error) {
+			return c.MarketSentiment.ConvictionIndex(ctx, &ConvictionIndexRequest{Asset: &AssetRef{ID: "NVDA", Class: AssetClassEquity}})
+		}},
+		{op: "get_fear_greed_index", path: "/fear-greed-index", call: func(t *testing.T, c *Client) (any, error) {
+			return c.MarketSentiment.FearGreedIndex(ctx, &FearGreedIndexRequest{Asset: &AssetRef{ID: "BTC", Class: AssetClassCrypto}})
+		}},
+		{op: "get_price_levels", path: "/price-levels", call: func(t *testing.T, c *Client) (any, error) {
+			return c.MarketSentiment.PriceLevels(ctx, &PriceLevelsRequest{Asset: &AssetRef{ID: "NVDA", Class: AssetClassEquity}})
+		}},
+		{op: "get_social_volume_index", path: "/social-volume-index", call: func(t *testing.T, c *Client) (any, error) {
+			return c.MarketSentiment.SocialVolumeIndex(ctx, &SocialVolumeIndexRequest{Asset: &AssetRef{ID: "NVDA", Class: AssetClassEquity}})
+		}},
+		{op: "get_social_volume_profile", path: "/social-volume-profile", call: func(t *testing.T, c *Client) (any, error) {
+			return c.MarketSentiment.SocialVolumeProfile(ctx, &SocialVolumeProfileRequest{Asset: &AssetRef{ID: "NVDA", Class: AssetClassEquity}})
+		}},
+		{op: "get_price_history", path: "/price-history", call: func(t *testing.T, c *Client) (any, error) {
+			return c.MarketData.PriceHistory(ctx, &PriceHistoryRequest{Asset: &AssetRef{ID: "NVDA", Class: AssetClassEquity}})
+		}},
+		{op: "list_calendar_events", path: "/calendar-events", call: func(t *testing.T, c *Client) (any, error) {
+			return c.Intelligence.CalendarEvents(ctx, &CalendarEventsRequest{Domains: []CalendarDomain{CalendarDomainCrypto, CalendarDomainEquities}})
+		}},
+		{op: "list_insights", path: "/insights", call: func(t *testing.T, c *Client) (any, error) {
+			return c.Intelligence.Insights(ctx, &InsightsRequest{Tags: []string{"etf", "earnings"}})
+		}},
+		{op: "get_insight_attention", path: "/insights/attention", call: func(t *testing.T, c *Client) (any, error) {
+			return c.Intelligence.InsightAttention(ctx, &InsightAttentionRequest{InsightID: 42})
+		}},
+		{op: "list_clusters", path: "/clusters", call: func(t *testing.T, c *Client) (any, error) { return c.Clusters.List(ctx, &ClustersRequest{}) }},
+		{op: "compare_clusters", path: "/clusters/comparison", call: func(t *testing.T, c *Client) (any, error) {
+			return c.Clusters.Comparison(ctx, &ClustersComparisonRequest{AssetClasses: []AssetClass{AssetClassEquity, AssetClassCrypto}})
+		}},
+		{op: "get_divisive_assets", path: "/clusters/comparison/divisive-assets", call: func(t *testing.T, c *Client) (any, error) {
+			return c.Clusters.DivisiveAssets(ctx, &DivisiveAssetsRequest{})
+		}},
+		{op: "compare_hype_cycles", path: "/clusters/comparison/hype-cycles", call: func(t *testing.T, c *Client) (any, error) {
+			return c.Clusters.ComparisonHypeCycles(ctx, &ComparisonHypeCyclesRequest{})
+		}},
+		{op: "compare_cluster_traits", path: "/clusters/comparison/traits", call: func(t *testing.T, c *Client) (any, error) {
+			return c.Clusters.ComparisonTraits(ctx, &ComparisonTraitsRequest{})
+		}},
+		{op: "get_cluster_hype_cycles", path: "/clusters/hype-cycles", call: func(t *testing.T, c *Client) (any, error) {
+			return c.Clusters.HypeCycles(ctx, &ClusterHypeCyclesRequest{ClusterID: ClusterKOLs})
+		}},
+		{op: "get_cluster_overlap", path: "/clusters/overlap", call: func(t *testing.T, c *Client) (any, error) {
+			return c.Clusters.Overlap(ctx, &ClusterOverlapRequest{ClusterID: ClusterKOLs})
+		}},
+		{op: "get_cluster_profile", path: "/clusters/profile", call: func(t *testing.T, c *Client) (any, error) {
+			return c.Clusters.Profile(ctx, &ClusterProfileRequest{ClusterID: ClusterKOLs})
+		}},
+		{op: "get_cluster_rotation", path: "/clusters/rotation", call: func(t *testing.T, c *Client) (any, error) {
+			return c.Clusters.Rotation(ctx, &ClusterRotationRequest{ClusterID: ClusterKOLs})
+		}},
+		{op: "get_cluster_stances", path: "/clusters/stances", call: func(t *testing.T, c *Client) (any, error) {
+			return c.Clusters.Stances(ctx, &ClusterStancesRequest{ClusterID: ClusterKOLs})
+		}},
+		{op: "create_chat_completion", path: "/chat/completions", call: func(t *testing.T, c *Client) (any, error) {
+			return c.Agent.CreateChatCompletion(ctx, &ChatCompletionRequest{Messages: []ChatMessage{{Role: ChatRoleUser, Content: "hi"}}})
+		}},
+		{op: "get_account", path: "/account", call: func(t *testing.T, c *Client) (any, error) { return c.Account.Get(ctx) }},
+		{op: "list_prediction_markets", path: "/predictions", call: func(t *testing.T, c *Client) (any, error) {
+			return c.Predictions.ListMarkets(ctx, &PredictionsRequest{Status: PredictionStatusPtr(PredictionStatusOpen)})
+		}},
+		{op: "get_prediction_history", path: "/predictions/history", call: func(t *testing.T, c *Client) (any, error) {
+			return c.Predictions.History(ctx, &PredictionHistoryRequest{ListingID: "l1", OutcomeID: "o1"})
+		}},
+		{op: "get_prediction_market", path: "/predictions/market", call: func(t *testing.T, c *Client) (any, error) {
+			return c.Predictions.Market(ctx, &PredictionMarketRequest{MarketID: "m1"})
+		}},
 	}
+}
+
+// TestCoverage exercises all 41 operations against an HTTP server and checks
+// their routes, authentication, fixtures, documentation and x402 eligibility.
+func TestCoverage(t *testing.T) {
 	ctx := context.Background()
-	steps := []step{
-		{op: "screener", path: "/screener", call: func(t *testing.T, c *Client) error {
-			_, err := c.Discovery.Screener(ctx, &ScreenerRequest{Kind: KindPtr(KindAsset)})
-			return err
-		}},
-		{op: "get_top_momentum", path: "/top-momentum", call: func(t *testing.T, c *Client) error {
-			_, err := c.Discovery.TopMomentum(ctx, &TopMomentumRequest{})
-			return err
-		}},
-		{op: "get_top_trending", path: "/top-trending", call: func(t *testing.T, c *Client) error {
-			_, err := c.Discovery.TopTrending(ctx, &TopTrendingRequest{})
-			return err
-		}},
-		{op: "list_assets", path: "/assets", call: func(t *testing.T, c *Client) error {
-			_, err := c.Lookup.ListAssets(ctx, &ListAssetsRequest{Query: StringPtr("NVIDIA")})
-			return err
-		}},
-		{op: "search", path: "/search", call: func(t *testing.T, c *Client) error {
-			_, err := c.Lookup.Search(ctx, &SearchRequest{Query: "NVIDIA"})
-			return err
-		}},
-		{op: "list_subjects", path: "/subjects", call: func(t *testing.T, c *Client) error {
-			_, err := c.Lookup.ListSubjects(ctx, &ListSubjectsRequest{Query: StringPtr("nvidia")})
-			return err
-		}},
-		{op: "get_emotions", path: "/emotions", call: func(t *testing.T, c *Client) error {
-			_, err := c.Social.Emotions(ctx, &EmotionsRequest{Asset: &AssetRef{ID: "NVDA", Class: AssetClassEquity}})
-			return err
-		}},
-		{op: "get_mindshare", path: "/mindshare", call: func(t *testing.T, c *Client) error {
-			_, err := c.Social.Mindshare(ctx, &MindshareRequest{Subject: &SubjectRef{ID: "subject_1"}})
-			return err
-		}},
-		{op: "get_related_subjects", path: "/related-subjects", call: func(t *testing.T, c *Client) error {
-			_, err := c.Social.RelatedSubjects(ctx, &RelatedSubjectsRequest{Asset: &AssetRef{ID: "NVDA", Class: AssetClassEquity}})
-			return err
-		}},
-		{op: "get_sentiment", path: "/sentiment", call: func(t *testing.T, c *Client) error {
-			_, err := c.Social.Sentiment(ctx, &SentimentRequest{Asset: &AssetRef{ID: "NVDA", Class: AssetClassEquity}, Hours: IntPtr(168)})
-			return err
-		}},
-		{op: "get_sentiment_timeframes", path: "/sentiment/timeframes", call: func(t *testing.T, c *Client) error {
-			_, err := c.Social.SentimentTimeframes(ctx, &SentimentTimeframesRequest{Subject: &SubjectRef{ID: "subject_1"}})
-			return err
-		}},
-		{op: "get_social_momentum", path: "/social-momentum", call: func(t *testing.T, c *Client) error {
-			_, err := c.Social.SocialMomentum(ctx, &SocialMomentumRequest{Asset: &AssetRef{ID: "NVDA", Class: AssetClassEquity}})
-			return err
-		}},
-		{op: "list_forecast_assets", path: "/forecasts/assets", call: func(t *testing.T, c *Client) error {
-			_, err := c.Forecasts.ListAssets(ctx, &ForecastAssetsRequest{})
-			return err
-		}},
-		{op: "get_mindshare_forecast", path: "/forecasts/mindshare", call: func(t *testing.T, c *Client) error {
-			_, err := c.Forecasts.Mindshare(ctx, &MindshareForecastRequest{Asset: &AssetRef{ID: "NVDA", Class: AssetClassEquity}})
-			return err
-		}},
-		{op: "get_sentiment_forecast", path: "/forecasts/sentiment", call: func(t *testing.T, c *Client) error {
-			_, err := c.Forecasts.Sentiment(ctx, &SentimentForecastRequest{Asset: &AssetRef{ID: "NVDA", Class: AssetClassEquity}})
-			return err
-		}},
-		{op: "get_calls", path: "/calls", call: func(t *testing.T, c *Client) error {
-			_, err := c.MarketSentiment.Calls(ctx, &CallsRequest{Clusters: []string{"kols", "media"}})
-			return err
-		}},
-		{op: "get_call_returns", path: "/calls/returns", call: func(t *testing.T, c *Client) error {
-			_, err := c.MarketSentiment.CallReturns(ctx, &CallReturnsRequest{})
-			return err
-		}},
-		{op: "get_conviction_index", path: "/conviction-index", call: func(t *testing.T, c *Client) error {
-			_, err := c.MarketSentiment.ConvictionIndex(ctx, &ConvictionIndexRequest{Asset: &AssetRef{ID: "NVDA", Class: AssetClassEquity}})
-			return err
-		}},
-		{op: "get_fear_greed_index", path: "/fear-greed-index", call: func(t *testing.T, c *Client) error {
-			_, err := c.MarketSentiment.FearGreedIndex(ctx, &FearGreedIndexRequest{Asset: &AssetRef{ID: "BTC", Class: AssetClassCrypto}})
-			return err
-		}},
-		{op: "get_price_levels", path: "/price-levels", call: func(t *testing.T, c *Client) error {
-			_, err := c.MarketSentiment.PriceLevels(ctx, &PriceLevelsRequest{Asset: &AssetRef{ID: "NVDA", Class: AssetClassEquity}})
-			return err
-		}},
-		{op: "get_social_volume_index", path: "/social-volume-index", call: func(t *testing.T, c *Client) error {
-			_, err := c.MarketSentiment.SocialVolumeIndex(ctx, &SocialVolumeIndexRequest{Asset: &AssetRef{ID: "NVDA", Class: AssetClassEquity}})
-			return err
-		}},
-		{op: "get_social_volume_profile", path: "/social-volume-profile", call: func(t *testing.T, c *Client) error {
-			_, err := c.MarketSentiment.SocialVolumeProfile(ctx, &SocialVolumeProfileRequest{Asset: &AssetRef{ID: "NVDA", Class: AssetClassEquity}})
-			return err
-		}},
-		{op: "get_price_history", path: "/price-history", call: func(t *testing.T, c *Client) error {
-			_, err := c.MarketData.PriceHistory(ctx, &PriceHistoryRequest{Asset: &AssetRef{ID: "NVDA", Class: AssetClassEquity}})
-			return err
-		}},
-		{op: "list_calendar_events", path: "/calendar-events", call: func(t *testing.T, c *Client) error {
-			_, err := c.Intelligence.CalendarEvents(ctx, &CalendarEventsRequest{Domains: []CalendarDomain{CalendarDomainCrypto, CalendarDomainEquities}})
-			return err
-		}},
-		{op: "list_insights", path: "/insights", call: func(t *testing.T, c *Client) error {
-			_, err := c.Intelligence.Insights(ctx, &InsightsRequest{Tags: []string{"etf", "earnings"}})
-			return err
-		}},
-		{op: "get_insight_attention", path: "/insights/attention", call: func(t *testing.T, c *Client) error {
-			_, err := c.Intelligence.InsightAttention(ctx, &InsightAttentionRequest{InsightID: 42})
-			return err
-		}},
-		{op: "list_clusters", path: "/clusters", call: func(t *testing.T, c *Client) error { _, err := c.Clusters.List(ctx, &ClustersRequest{}); return err }},
-		{op: "compare_clusters", path: "/clusters/comparison", call: func(t *testing.T, c *Client) error {
-			_, err := c.Clusters.Comparison(ctx, &ClustersComparisonRequest{AssetClasses: []AssetClass{AssetClassEquity, AssetClassCrypto}})
-			return err
-		}},
-		{op: "get_divisive_assets", path: "/clusters/comparison/divisive-assets", call: func(t *testing.T, c *Client) error {
-			_, err := c.Clusters.DivisiveAssets(ctx, &DivisiveAssetsRequest{})
-			return err
-		}},
-		{op: "compare_hype_cycles", path: "/clusters/comparison/hype-cycles", call: func(t *testing.T, c *Client) error {
-			_, err := c.Clusters.ComparisonHypeCycles(ctx, &ComparisonHypeCyclesRequest{})
-			return err
-		}},
-		{op: "compare_cluster_traits", path: "/clusters/comparison/traits", call: func(t *testing.T, c *Client) error {
-			_, err := c.Clusters.ComparisonTraits(ctx, &ComparisonTraitsRequest{})
-			return err
-		}},
-		{op: "get_cluster_hype_cycles", path: "/clusters/hype-cycles", call: func(t *testing.T, c *Client) error {
-			_, err := c.Clusters.HypeCycles(ctx, &ClusterHypeCyclesRequest{ClusterID: ClusterKOLs})
-			return err
-		}},
-		{op: "get_cluster_overlap", path: "/clusters/overlap", call: func(t *testing.T, c *Client) error {
-			_, err := c.Clusters.Overlap(ctx, &ClusterOverlapRequest{ClusterID: ClusterKOLs})
-			return err
-		}},
-		{op: "get_cluster_profile", path: "/clusters/profile", call: func(t *testing.T, c *Client) error {
-			_, err := c.Clusters.Profile(ctx, &ClusterProfileRequest{ClusterID: ClusterKOLs})
-			return err
-		}},
-		{op: "get_cluster_rotation", path: "/clusters/rotation", call: func(t *testing.T, c *Client) error {
-			_, err := c.Clusters.Rotation(ctx, &ClusterRotationRequest{ClusterID: ClusterKOLs})
-			return err
-		}},
-		{op: "get_cluster_stances", path: "/clusters/stances", call: func(t *testing.T, c *Client) error {
-			_, err := c.Clusters.Stances(ctx, &ClusterStancesRequest{ClusterID: ClusterKOLs})
-			return err
-		}},
-		{op: "create_chat_completion", path: "/chat/completions", call: func(t *testing.T, c *Client) error {
-			_, err := c.Agent.CreateChatCompletion(ctx, &ChatCompletionRequest{Messages: []ChatMessage{{Role: ChatRoleUser, Content: "hi"}}})
-			return err
-		}},
-		{op: "get_account", path: "/account", call: func(t *testing.T, c *Client) error { _, err := c.Account.Get(ctx); return err }},
-		{op: "list_prediction_markets", path: "/predictions", call: func(t *testing.T, c *Client) error {
-			_, err := c.Predictions.ListMarkets(ctx, &PredictionsRequest{Status: PredictionStatusPtr(PredictionStatusOpen)})
-			return err
-		}},
-		{op: "get_prediction_history", path: "/predictions/history", call: func(t *testing.T, c *Client) error {
-			_, err := c.Predictions.History(ctx, &PredictionHistoryRequest{ListingID: "l1", OutcomeID: "o1"})
-			return err
-		}},
-		{op: "get_prediction_market", path: "/predictions/market", call: func(t *testing.T, c *Client) error {
-			_, err := c.Predictions.Market(ctx, &PredictionMarketRequest{MarketID: "m1"})
-			return err
-		}},
+	steps := coverageSteps(ctx)
+	// Tie the exercised service calls to the contract, docs, and fixtures. A new
+	// upstream operation cannot silently disappear from the test matrix.
+	specBytes, err := os.ReadFile("resources/openapi/nebula-openapi.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var spec struct {
+		Paths map[string]map[string]struct {
+			ID       string `json:"operationId"`
+			Eligible bool   `json:"x-x402-eligible"`
+		} `json:"paths"`
+	}
+	if err := json.Unmarshal(specBytes, &spec); err != nil {
+		t.Fatal(err)
+	}
+	docBytes, err := os.ReadFile("docs/API-COVERAGE.md")
+	if err != nil {
+		t.Fatal(err)
+	}
+	stepPaths := map[string]string{}
+	for _, st := range steps {
+		if _, duplicate := stepPaths[st.op]; duplicate {
+			t.Fatalf("duplicate test for %s", st.op)
+		}
+		stepPaths[st.op] = st.path
+	}
+	operations, eligible := 0, 0
+	for path, methods := range spec.Paths {
+		for method, op := range methods {
+			if method != "get" && method != "post" {
+				continue
+			}
+			operations++
+			if op.Eligible {
+				eligible++
+			}
+			if stepPaths[op.ID] != path {
+				t.Errorf("missing service fixture test for %s %s (%s)", method, path, op.ID)
+			}
+			if pathToOp[strings.TrimPrefix(path, "/")] != op.ID {
+				t.Errorf("fixture mapping missing for %s", op.ID)
+			}
+			if !strings.Contains(string(docBytes), "`"+op.ID+"`") {
+				t.Errorf("docs missing operation %s", op.ID)
+			}
+			if X402Eligible(op.ID) != op.Eligible {
+				t.Errorf("x402 eligibility differs from OpenAPI for %s", op.ID)
+			}
+		}
+	}
+	if operations != 41 || len(steps) != operations || eligible != 37 {
+		t.Fatalf("operations=%d tests=%d eligible=%d", operations, len(steps), eligible)
 	}
 
 	var gotPaths []string
@@ -218,7 +236,7 @@ func TestCoverage(t *testing.T) {
 	}
 
 	for _, st := range steps {
-		if err := st.call(t, client); err != nil {
+		if _, err := st.call(t, client); err != nil {
 			t.Errorf("%s: %v", st.op, err)
 		}
 	}
@@ -288,63 +306,3 @@ var pathToOp = map[string]string{
 	"predictions/history":                 "get_prediction_history",
 	"predictions/market":                  "get_prediction_market",
 }
-
-// TestFixtureDecodes checks each generated fixture still decodes into its
-// typed response — guards against upstream drift in the vendored spec.
-func TestFixtureDecodes(t *testing.T) {
-	ops := []string{
-		"screener",
-		"get_top_momentum",
-		"get_top_trending",
-		"list_assets",
-		"search",
-		"list_subjects",
-		"get_emotions",
-		"get_mindshare",
-		"get_related_subjects",
-		"get_sentiment",
-		"get_sentiment_timeframes",
-		"get_social_momentum",
-		"list_forecast_assets",
-		"get_mindshare_forecast",
-		"get_sentiment_forecast",
-		"get_calls",
-		"get_call_returns",
-		"get_conviction_index",
-		"get_fear_greed_index",
-		"get_price_levels",
-		"get_social_volume_index",
-		"get_social_volume_profile",
-		"get_price_history",
-		"list_calendar_events",
-		"list_insights",
-		"get_insight_attention",
-		"list_clusters",
-		"compare_clusters",
-		"get_divisive_assets",
-		"compare_hype_cycles",
-		"compare_cluster_traits",
-		"get_cluster_hype_cycles",
-		"get_cluster_overlap",
-		"get_cluster_profile",
-		"get_cluster_rotation",
-		"get_cluster_stances",
-		"create_chat_completion",
-		"get_account",
-		"list_prediction_markets",
-		"get_prediction_history",
-		"get_prediction_market",
-	}
-	for _, op := range ops {
-		b, err := os.ReadFile(filepath.Join("testdata", op+".json"))
-		if err != nil {
-			t.Fatalf("%s: %v", op, err)
-		}
-		var v map[string]any
-		if err := json.Unmarshal(b, &v); err != nil {
-			t.Errorf("%s: fixture is not an object: %v", op, err)
-		}
-	}
-}
-
-var _ = time.Now // keep time import when unused

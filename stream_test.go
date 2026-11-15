@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -181,4 +182,94 @@ func TestNonStreamingCompletion(t *testing.T) {
 func readJSON(r *http.Request, v any) {
 	defer r.Body.Close()
 	_ = json.NewDecoder(r.Body).Decode(v)
+}
+
+func TestStreamTerminalFailures(t *testing.T) {
+	for _, tc := range []struct{ name, payload, message string }{
+		{"error frame", "data: {\"error\":true,\"message\":\"upstream failed\"}\n\n", "upstream failed"},
+		{"OpenAI error frame", "data: {\"error\":{\"message\":\"failed\"}}\n\n", "API error event"},
+		{"truncated stream", "data: {\"choices\":[{\"index\":0,\"delta\":{\"content\":\"partial\"}}]}\n\n", "unexpected EOF"},
+		{"noncompletion JSON", "data: {}\n\n", "malformed"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			c, closeServer := newTestClient(t, func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Content-Type", "text/event-stream")
+				_, _ = io.WriteString(w, tc.payload)
+			})
+			defer closeServer()
+			s, err := c.Agent.StreamChatCompletion(context.Background(), streamRequest())
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer s.Close()
+			for range s.Events() {
+			}
+			if s.Err() == nil || !strings.Contains(s.Err().Error(), tc.message) {
+				t.Fatalf("err=%v", s.Err())
+			}
+		})
+	}
+}
+
+func TestStreamCancelWithFullEventBuffer(t *testing.T) {
+	sent := make(chan struct{})
+	c, closeServer := newTestClient(t, func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/event-stream")
+		for range 100 {
+			_, _ = io.WriteString(w, "data: {\"choices\":[{\"index\":0,\"delta\":{\"content\":\"hi\"}}]}\n\n")
+		}
+		w.(http.Flusher).Flush()
+		close(sent)
+		<-r.Context().Done()
+	})
+	defer closeServer()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	s, err := c.Agent.StreamChatCompletion(ctx, streamRequest())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer s.Close()
+	<-sent
+	cancel()
+	deadline := time.NewTimer(time.Second)
+	defer deadline.Stop()
+	for {
+		select {
+		case _, ok := <-s.Events():
+			if !ok {
+				if !errors.Is(s.Err(), context.Canceled) {
+					t.Fatalf("err=%v", s.Err())
+				}
+				return
+			}
+		case <-deadline.C:
+			t.Fatal("cancellation did not stop the buffered reader")
+		}
+	}
+}
+
+func TestStreamTimeoutAndContentType(t *testing.T) {
+	c, closeServer := newTestClient(t, func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/event-stream")
+		w.WriteHeader(http.StatusOK)
+		w.(http.Flusher).Flush()
+		<-r.Context().Done()
+	}, WithTimeout(40*time.Millisecond))
+	defer closeServer()
+	s, err := c.Agent.StreamChatCompletion(context.Background(), streamRequest())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer s.Close()
+	for range s.Events() {
+	}
+	if !errors.Is(s.Err(), context.DeadlineExceeded) {
+		t.Fatalf("timeout err=%v", s.Err())
+	}
+	c2, closeSecond := newTestClient(t, func(w http.ResponseWriter, r *http.Request) { _, _ = io.WriteString(w, `{}`) })
+	defer closeSecond()
+	if _, err := c2.Agent.StreamChatCompletion(context.Background(), streamRequest()); err == nil {
+		t.Fatal("expected content type error")
+	}
 }

@@ -48,10 +48,10 @@ func (r *CalendarEventsRequest) query() (url.Values, error) {
 		v.Set("offset", strconv.Itoa(*r.Offset))
 	}
 	if r.StartTimeAfter != nil {
-		v.Set("start_time_after", r.StartTimeAfter.UTC().Format(time.RFC3339))
+		v.Set("start_time_after", r.StartTimeAfter.UTC().Format(time.RFC3339Nano))
 	}
 	if r.StartTimeBefore != nil {
-		v.Set("start_time_before", r.StartTimeBefore.UTC().Format(time.RFC3339))
+		v.Set("start_time_before", r.StartTimeBefore.UTC().Format(time.RFC3339Nano))
 	}
 	if len(r.Domains) > 0 {
 		v.Set("domains", csvJoin(r.Domains))
@@ -129,10 +129,10 @@ func (r *InsightsRequest) query() (url.Values, error) {
 		v.Set("offset", strconv.Itoa(*r.Offset))
 	}
 	if r.StartTimeAfter != nil {
-		v.Set("start_time_after", r.StartTimeAfter.UTC().Format(time.RFC3339))
+		v.Set("start_time_after", r.StartTimeAfter.UTC().Format(time.RFC3339Nano))
 	}
 	if r.StartTimeBefore != nil {
-		v.Set("start_time_before", r.StartTimeBefore.UTC().Format(time.RFC3339))
+		v.Set("start_time_before", r.StartTimeBefore.UTC().Format(time.RFC3339Nano))
 	}
 	if len(r.Tags) > 0 {
 		v.Set("tags", csvJoin(r.Tags))

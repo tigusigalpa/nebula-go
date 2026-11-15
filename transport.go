@@ -8,10 +8,11 @@ import (
 	"fmt"
 	"io"
 	"math/rand"
+	"net"
 	"net/http"
 	"net/url"
-	"strconv"
 	"strings"
+	"syscall"
 	"time"
 )
 
@@ -23,11 +24,10 @@ type queryRequest interface {
 type transport struct {
 	cfg    *config
 	apiKey string
-	rnd    *rand.Rand
 }
 
 func newTransport(cfg *config, apiKey string) *transport {
-	return &transport{cfg: cfg, apiKey: apiKey, rnd: rand.New(rand.NewSource(time.Now().UnixNano()))}
+	return &transport{cfg: cfg, apiKey: apiKey}
 }
 
 // get executes a GET for operation op and decodes the body into T.
@@ -43,6 +43,9 @@ func get[T any](ctx context.Context, c *Client, path string, req queryRequest, o
 	if c.cfg.x402Mode && !x402Eligible(op) {
 		return nil, fmt.Errorf("nebula: %s: %w", op, ErrNotX402Eligible)
 	}
+	if err := validateQuery(op, q); err != nil {
+		return nil, err
+	}
 	return doJSON[T](ctx, c.tr, http.MethodGet, path, q, nil, op)
 }
 
@@ -57,23 +60,21 @@ func postJSON[T any](ctx context.Context, c *Client, path string, body any, op s
 // doJSON performs the request with retry, decodes the JSON body into a new T,
 // attaches metadata, and keeps the raw decoded object.
 func doJSON[T any](ctx context.Context, t *transport, method, path string, q url.Values, body any, op string) (*T, error) {
+	ctx, cancel := context.WithTimeout(ctx, t.cfg.timeout)
+	defer cancel()
 	var lastErr error
 	attempts := t.retryableAttempts(method)
-	deadline := time.Now().Add(t.cfg.timeout)
 	for attempt := 0; attempt < attempts; attempt++ {
+		if err := ctx.Err(); err != nil {
+			return nil, &TransportError{Op: op, Err: err}
+		}
 		if attempt > 0 {
 			delay := t.backoff(attempt, lastErr)
-			if sleepErr := sleepCtx(ctx, delay, deadline); sleepErr != nil {
-				return nil, lastErrOr(lastErr, sleepErr)
+			if sleepErr := sleepCtx(ctx, delay); sleepErr != nil {
+				return nil, &TransportError{Op: op, Err: sleepErr}
 			}
 		}
-		remaining := time.Until(deadline)
-		if remaining <= 0 {
-			return nil, lastErrOr(lastErr, context.DeadlineExceeded)
-		}
-		attCtx, cancel := context.WithDeadline(ctx, deadline)
-		resp, err := t.doOnce(attCtx, method, path, q, body, op)
-		cancel()
+		resp, err := t.doOnce(ctx, method, path, q, body, op)
 		if err == nil {
 			out, derr := decodeResponse[T](resp, op)
 			resp.Body.Close()
@@ -90,15 +91,8 @@ func doJSON[T any](ctx context.Context, t *transport, method, path string, q url
 	return nil, lastErr
 }
 
-func lastErrOr(last, fallback error) error {
-	if last != nil {
-		return last
-	}
-	return fallback
-}
-
 func (t *transport) retryableAttempts(method string) int {
-	if method != http.MethodGet {
+	if method != http.MethodGet || t.cfg.x402Mode {
 		return 1
 	}
 	return t.cfg.retry.normalized().MaxAttempts
@@ -108,22 +102,33 @@ func (t *transport) retryableAttempts(method string) int {
 // Only safe idempotent GET retries: transport errors, 429, and 5xx.
 // Deterministic 4xx (400, 401, 402, 403, 404, 405) and POSTs never retry.
 func (t *transport) shouldRetry(method string, err error) bool {
-	if method != http.MethodGet {
+	if method != http.MethodGet || t.cfg.x402Mode || errors.Is(err, ErrPaymentUncertain) {
 		return false
 	}
 	var te *TransportError
 	if errors.As(err, &te) {
-		return !errors.Is(err, context.Canceled) && !errors.Is(err, context.DeadlineExceeded)
+		if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
+			return false
+		}
+		var ne net.Error
+		if errors.As(err, &ne) && ne.Timeout() {
+			return true
+		}
+		var dns *net.DNSError
+		if errors.As(err, &dns) && dns.IsTemporary {
+			return true
+		}
+		for _, transient := range []error{io.EOF, io.ErrUnexpectedEOF, syscall.ECONNRESET, syscall.ECONNREFUSED, syscall.ECONNABORTED, syscall.EPIPE} {
+			if errors.Is(err, transient) {
+				return true
+			}
+		}
+		return false
 	}
 	var ae *APIError
 	if errors.As(err, &ae) {
 		switch ae.StatusCode {
 		case 429, 500, 502, 503, 504:
-			// On the x402 surface a 503 may follow settlement; the caller's
-			// payment state is uncertain and must NOT be reauthorized here.
-			if t.cfg.x402Mode {
-				return false
-			}
 			return true
 		}
 		return false
@@ -137,32 +142,33 @@ func (t *transport) backoff(attempt int, lastErr error) time.Duration {
 	var ae *APIError
 	if errors.As(lastErr, &ae) {
 		if ae.Metadata.RetryAfterSeconds != nil {
-			return time.Duration(*ae.Metadata.RetryAfterSeconds) * time.Second
-		}
-		if ae.Metadata.RateLimitReset != nil {
-			return time.Duration(*ae.Metadata.RateLimitReset) * time.Second
+			return secondsDelay(*ae.Metadata.RetryAfterSeconds)
 		}
 		if ae.RetryAfter > 0 {
 			return ae.RetryAfter
 		}
+		if ae.Metadata.RateLimitReset != nil {
+			return secondsDelay(*ae.Metadata.RateLimitReset)
+		}
 	}
 	p := t.cfg.retry.normalized()
-	d := p.BaseDelay << uint(attempt-1)
-	if d > p.MaxDelay {
-		d = p.MaxDelay
+	d := min(p.BaseDelay, p.MaxDelay)
+	for i := 1; i < attempt && d < p.MaxDelay; i++ {
+		if d > p.MaxDelay/2 {
+			d = p.MaxDelay
+		} else {
+			d *= 2
+		}
 	}
-	jitter := time.Duration(float64(d) * 0.25 * (t.rnd.Float64()*2 - 1))
-	d += jitter
-	if d < 0 {
-		d = p.BaseDelay
+	// The package-level generator is safe for concurrent use. Cap after jitter.
+	jitter := time.Duration(float64(d) * 0.25 * (rand.Float64()*2 - 1))
+	if jitter > 0 && d > p.MaxDelay-jitter {
+		return p.MaxDelay
 	}
-	return d
+	return d + jitter
 }
 
-func sleepCtx(ctx context.Context, d time.Duration, deadline time.Time) error {
-	if until := time.Until(deadline); d > until {
-		d = until
-	}
+func sleepCtx(ctx context.Context, d time.Duration) error {
 	timer := time.NewTimer(d)
 	defer timer.Stop()
 	select {
@@ -176,7 +182,7 @@ func sleepCtx(ctx context.Context, d time.Duration, deadline time.Time) error {
 // doOnce performs a single HTTP request and returns either the response
 // (caller closes Body) or a classified error.
 func (t *transport) doOnce(ctx context.Context, method, path string, q url.Values, body any, op string) (*http.Response, error) {
-	u, err := t.buildURL(path, q)
+	u, err := t.buildURL(ctx, path, q)
 	if err != nil {
 		return nil, err
 	}
@@ -209,7 +215,7 @@ func (t *transport) doOnce(ctx context.Context, method, path string, q url.Value
 	if err != nil {
 		return nil, &TransportError{Op: op, Err: err}
 	}
-	if resp.StatusCode >= 400 {
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		defer resp.Body.Close()
 		return nil, decodeAPIError(resp, op)
 	}
@@ -229,7 +235,7 @@ func (t *transport) applyAuth(req *http.Request) {
 }
 
 // buildURL joins base + path + query without producing double slashes.
-func (t *transport) buildURL(path string, q url.Values) (string, error) {
+func (t *transport) buildURL(ctx context.Context, path string, q url.Values) (string, error) {
 	base, err := url.Parse(t.cfg.baseURL)
 	if err != nil {
 		return "", err
@@ -241,8 +247,8 @@ func (t *transport) buildURL(path string, q url.Values) (string, error) {
 			vals.Add(k, v)
 		}
 	}
-	if t.cfg.locale != "" && t.cfg.localeMode == LocaleModeQuery {
-		vals.Set("locale", string(t.cfg.locale))
+	if locale, mode := localeFor(ctx, t.cfg); locale != "" && mode == LocaleModeQuery {
+		vals.Set("locale", string(locale))
 	}
 	base.RawQuery = vals.Encode()
 	return base.String(), nil
@@ -256,10 +262,11 @@ func decodeResponse[T any](resp *http.Response, op string) (*T, error) {
 		return nil, &TransportError{Op: op, Err: err}
 	}
 	out := new(T)
-	if len(bytes.TrimSpace(body)) > 0 {
-		if err := json.Unmarshal(body, out); err != nil {
-			return nil, &StreamError{Op: op, Err: fmt.Errorf("decode response: %w", err)}
-		}
+	if trimmed := bytes.TrimSpace(body); len(trimmed) == 0 || trimmed[0] != '{' {
+		return nil, &DecodeError{Op: op, Err: errors.New("expected a JSON object")}
+	}
+	if err := json.Unmarshal(body, out); err != nil {
+		return nil, &DecodeError{Op: op, Err: fmt.Errorf("decode response: %w", err)}
 	}
 	if c, ok := any(out).(metaCarrier); ok {
 		c.setMetadata(parseMetadata(resp.StatusCode, resp.Header))
@@ -281,7 +288,6 @@ func decodeAPIError(resp *http.Response, op string) error {
 		Body:       body,
 	}
 	var payload struct {
-		Error            *bool   `json:"error"`
 		Message          *string `json:"message"`
 		PlanRenewsAt     *string `json:"plan_renews_at"`
 		PurchasedCredits *int64  `json:"purchased_credits"`
@@ -301,11 +307,7 @@ func decodeAPIError(resp *http.Response, op string) error {
 		ae.Message = http.StatusText(resp.StatusCode)
 	}
 	if ae.Metadata.RetryAfterSeconds != nil {
-		ae.RetryAfter = time.Duration(*ae.Metadata.RetryAfterSeconds) * time.Second
-	} else if v := resp.Header.Get("Retry-After"); v != "" {
-		if n, err := strconv.Atoi(v); err == nil {
-			ae.RetryAfter = time.Duration(n) * time.Second
-		}
+		ae.RetryAfter = secondsDelay(*ae.Metadata.RetryAfterSeconds)
 	}
 	return ae
 }
@@ -317,8 +319,10 @@ func redactURL(u string) string {
 		return "<unparseable url>"
 	}
 	q := parsed.Query()
-	for _, k := range []string{"api_key", "key", "token", "payment-signature", "signature"} {
-		if q.Has(k) {
+	parsed.User = nil
+	for k := range q {
+		switch strings.ToLower(k) {
+		case "api_key", "key", "token", "payment-signature", "signature", "authorization", "x-api-key", "x-payment":
 			q.Set(k, "[redacted]")
 		}
 	}

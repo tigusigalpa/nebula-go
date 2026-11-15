@@ -8,7 +8,7 @@ import (
 )
 
 // Version is the SDK release.
-const Version = "0.1.0"
+const Version = "0.2.0"
 
 // BaseURL is the account-authenticated API base.
 const BaseURL = "https://nebula-api.hiddensystems.ai/api/v1/public"
@@ -55,6 +55,7 @@ func New(apiKey string, opts ...Option) (*Client, error) {
 	if cfg.httpClient == nil {
 		cfg.httpClient = &http.Client{}
 	}
+	cfg.httpClient = secureHTTPClient(cfg.httpClient)
 	base, err := normalizeBase(cfg.baseURL)
 	if err != nil {
 		return nil, fmt.Errorf("nebula: invalid base URL: %w", err)
@@ -99,6 +100,7 @@ func NewX402Client(httpClient *http.Client, opts ...Option) (*Client, error) {
 	if cfg.httpClient == nil {
 		cfg.httpClient = &http.Client{}
 	}
+	cfg.httpClient = secureHTTPClient(cfg.httpClient)
 	base, err := normalizeBase(cfg.baseURL)
 	if err != nil {
 		return nil, err
@@ -137,11 +139,34 @@ func normalizeBase(u string) (string, error) {
 	if parsed.Host == "" {
 		return "", fmt.Errorf("base URL has no host: %q", u)
 	}
+	if parsed.User != nil {
+		return "", fmt.Errorf("base URL must not contain credentials")
+	}
 	parsed.Path = strings.TrimRight(parsed.Path, "/")
 	parsed.RawPath = ""
 	parsed.RawQuery = ""
 	parsed.Fragment = ""
 	return parsed.String(), nil
+}
+
+// Copy the client so later caller edits to its settings do not change the SDK.
+// Cross-origin redirects could leak X-API-Key or a signed payment header.
+func secureHTTPClient(hc *http.Client) *http.Client {
+	copy := *hc
+	checkRedirect := hc.CheckRedirect
+	copy.CheckRedirect = func(req *http.Request, via []*http.Request) error {
+		if len(via) > 0 && (req.URL.Scheme != via[0].URL.Scheme || !strings.EqualFold(req.URL.Host, via[0].URL.Host)) {
+			return http.ErrUseLastResponse
+		}
+		if checkRedirect != nil {
+			return checkRedirect(req, via)
+		}
+		if len(via) >= 10 {
+			return fmt.Errorf("stopped after 10 redirects")
+		}
+		return nil
+	}
+	return &copy
 }
 
 // service is the shared plumbing embedded in every service group.

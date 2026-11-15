@@ -39,7 +39,7 @@ type RetryPolicy struct {
 	// BaseDelay is the first backoff delay; each attempt doubles it up to
 	// MaxDelay, with +/-25% jitter.
 	BaseDelay time.Duration
-	// MaxDelay caps the computed backoff.
+	// MaxDelay caps the computed backoff including jitter, but not server hints.
 	MaxDelay time.Duration
 }
 
@@ -60,29 +60,26 @@ func (p RetryPolicy) normalized() RetryPolicy {
 type Option func(*config) error
 
 type config struct {
-	baseURL      string
-	httpClient   *http.Client
-	timeout      time.Duration
-	retry        RetryPolicy
-	authMode     AuthMode
-	locale       Locale
-	localeMode   LocaleMode
-	userAgent    string
-	x402Mode     bool
-	x402BaseURL  string
-	logger       Logger
-	perRequestUA string
+	baseURL    string
+	httpClient *http.Client
+	timeout    time.Duration
+	retry      RetryPolicy
+	authMode   AuthMode
+	locale     Locale
+	localeMode LocaleMode
+	userAgent  string
+	x402Mode   bool
+	logger     Logger
 }
 
 func defaultConfig() *config {
 	return &config{
-		baseURL:     BaseURL,
-		timeout:     30 * time.Second,
-		retry:       RetryPolicy{MaxAttempts: 3, BaseDelay: 250 * time.Millisecond, MaxDelay: 5 * time.Second},
-		authMode:    AuthModeAPIKey,
-		localeMode:  LocaleModeHeader,
-		userAgent:   "nebula-go/" + Version,
-		x402BaseURL: X402BaseURL,
+		baseURL:    BaseURL,
+		timeout:    30 * time.Second,
+		retry:      RetryPolicy{MaxAttempts: 3, BaseDelay: 250 * time.Millisecond, MaxDelay: 5 * time.Second},
+		authMode:   AuthModeAPIKey,
+		localeMode: LocaleModeHeader,
+		userAgent:  "nebula-go/" + Version,
 	}
 }
 
@@ -111,7 +108,8 @@ func WithHTTPClient(hc *http.Client) Option {
 }
 
 // WithTimeout sets the overall request timeout. The deadline covers all retry
-// attempts of one call. Zero or negative keeps the default.
+// attempts and response-body reading of one call, including streams. Zero keeps
+// the 30-second default; negative durations are rejected.
 func WithTimeout(d time.Duration) Option {
 	return func(c *config) error {
 		if d < 0 {

@@ -5,17 +5,40 @@ on:
     branches: [main]
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      GOTOOLCHAIN: local
     strategy:
       matrix:
-        go: ['1.22', '1.24']
+        go: ['1.24.x', 'stable']
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
           go-version: ${{ matrix.go }}
+          check-latest: true
+      - name: Check formatting
+        run: test -z "$(gofmt -l .)"
+      - name: Check generated query rules
+        run: |
+          go generate ./...
+          git diff --exit-code -- validation_rules.go
+      - name: Verify dependencies
+        run: |
+          go mod verify
+          go mod tidy
+          git diff --exit-code -- go.mod go.sum
       - run: go vet ./...
       - run: go test ./...
       - run: go test -race ./...
+      - name: Static analysis
+        if: matrix.go == 'stable'
+        run: go run honnef.co/go/tools/cmd/staticcheck@latest ./...
+      - name: Vulnerability check
+        if: matrix.go == 'stable'
+        run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...

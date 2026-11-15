@@ -187,7 +187,9 @@ func (r *RelatedSubjectsRequest) validate() error {
 // SentimentRequest carries the query parameters of `get_sentiment` (GET /sentiment).
 // Docs: https://docs.hiddensystems.ai/nebula/reference/get-sentiment/
 type SentimentRequest struct {
-	Asset       *AssetRef
+	Asset *AssetRef
+	// AssetClass selects the aggregate market when Asset and Subject are nil.
+	AssetClass  *AssetClass
 	Subject     *SubjectRef
 	Hours       *int
 	Granularity *Granularity
@@ -204,6 +206,9 @@ func (r *SentimentRequest) query() (url.Values, error) {
 		return nil, err
 	}
 	v := url.Values{}
+	if r.AssetClass != nil {
+		v.Set("asset_class", string(*r.AssetClass))
+	}
 	if r.Asset != nil {
 		v.Set("asset_id", r.Asset.ID)
 		v.Set("asset_class", string(r.Asset.Class))
@@ -228,6 +233,12 @@ func (r *SentimentRequest) query() (url.Values, error) {
 // validate enforces the documented client-side rules of `get_sentiment`
 // before any HTTP call is made.
 func (r *SentimentRequest) validate() error {
+	if err := validateClassFilter(r.Asset, r.AssetClass, r.Subject, "get_sentiment"); err != nil {
+		return err
+	}
+	if hasCommunity(r.Clusters) && r.AssetClass != nil && *r.AssetClass == AssetClassCrypto {
+		return &ValidationError{Op: "get_sentiment", Field: "clusters", Msg: "posting communities require asset_class equity, commodity or index"}
+	}
 	if r.Asset != nil && r.Subject != nil {
 		return &ValidationError{Op: "get_sentiment", Field: "subject", Msg: "subject and asset selectors are mutually exclusive"}
 	}
@@ -304,7 +315,9 @@ func (r *SentimentTimeframesRequest) validate() error {
 // SocialMomentumRequest carries the query parameters of `get_social_momentum` (GET /social-momentum).
 // Docs: https://docs.hiddensystems.ai/nebula/reference/get-social-momentum/
 type SocialMomentumRequest struct {
-	Asset       *AssetRef
+	Asset *AssetRef
+	// AssetClass selects the aggregate market when Asset and Subject are nil.
+	AssetClass  *AssetClass
 	Subject     *SubjectRef
 	Hours       *int
 	Granularity *Granularity
@@ -321,6 +334,9 @@ func (r *SocialMomentumRequest) query() (url.Values, error) {
 		return nil, err
 	}
 	v := url.Values{}
+	if r.AssetClass != nil {
+		v.Set("asset_class", string(*r.AssetClass))
+	}
 	if r.Asset != nil {
 		v.Set("asset_id", r.Asset.ID)
 		v.Set("asset_class", string(r.Asset.Class))
@@ -345,6 +361,9 @@ func (r *SocialMomentumRequest) query() (url.Values, error) {
 // validate enforces the documented client-side rules of `get_social_momentum`
 // before any HTTP call is made.
 func (r *SocialMomentumRequest) validate() error {
+	if err := validateClassFilter(r.Asset, r.AssetClass, r.Subject, "get_social_momentum"); err != nil {
+		return err
+	}
 	if r.Asset != nil && r.Subject != nil {
 		return &ValidationError{Op: "get_social_momentum", Field: "subject", Msg: "subject and asset selectors are mutually exclusive"}
 	}

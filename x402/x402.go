@@ -7,11 +7,9 @@
 // "exact" scheme. Payments are irreversible: always configure a SpendPolicy
 // and inspect PreviewOffer output before authorizing payments.
 //
-//	signer, err := x402.NewSignerFromPrivateKeyHex(os.Getenv("NEBULA_X402_KEY_HEX"))
-//	policy := x402.SpendPolicy{MaxUSDCPerPayment: "0.05"}
-//	httpClient, err := x402.NewHTTPClient(nil, signer, policy)
-//	client, err := x402.NewClient(signer, policy)
-//	assets, err := client.Lookup.ListAssets(ctx, &nebula.ListAssetsRequest{...})
+// PreviewOffer with a nil HTTP client fetches an offer without a signer or
+// payment. To enable payment, supply a Signer, MaxUSDCPerPayment, and an explicit
+// AllowedRecipients list to NewClient. See the README for the preview workflow.
 //
 // The SDK never logs private keys or signed payment payloads.
 package x402
@@ -20,9 +18,12 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
 	"math/big"
 	"net/http"
+	"net/url"
 	"strings"
 
 	nebula "github.com/tigusigalpa/nebula-go"
@@ -67,14 +68,13 @@ type SpendPolicy struct {
 	// SpendControls mechanism.
 	MaxUSDCPerPayment string
 	// AllowedRecipients restricts the payTo addresses that may be paid.
-	// Empty means the recipient is not restricted beyond the other checks;
-	// list the addresses Nebula publishes for defense in depth.
+	// Required: explicitly list the recipient addresses you trust.
 	AllowedRecipients []string
 	// AllowedHosts restricts which resource hosts may trigger payment.
 	// Defaults to Host when empty.
 	AllowedHosts []string
-	// RequireExactScheme rejects offers whose scheme is not "exact" (the only
-	// scheme Nebula accepts). Always true in practice.
+	// RequireExactScheme is retained for source compatibility. The exact scheme
+	// is always required, regardless of this field.
 	RequireExactScheme bool
 }
 
@@ -89,6 +89,20 @@ func (p SpendPolicy) hosts() []string {
 func (p SpendPolicy) maxAtomic() (*big.Int, error) {
 	if p.MaxUSDCPerPayment == "" {
 		return nil, fmt.Errorf("nebula/x402: MaxUSDCPerPayment is required")
+	}
+	parts := strings.Split(p.MaxUSDCPerPayment, ".")
+	if len(parts) > 2 || len(parts) == 2 && len(parts[1]) > USDCDecimals {
+		return nil, fmt.Errorf("nebula/x402: MaxUSDCPerPayment must be a decimal with at most 6 fractional digits")
+	}
+	for _, part := range parts {
+		if part == "" {
+			return nil, fmt.Errorf("nebula/x402: invalid decimal payment cap")
+		}
+		for _, digit := range part {
+			if digit < '0' || digit > '9' {
+				return nil, fmt.Errorf("nebula/x402: invalid decimal payment cap")
+			}
+		}
 	}
 	rat, ok := new(big.Rat).SetString(p.MaxUSDCPerPayment)
 	if !ok || rat.Sign() < 0 {
@@ -117,6 +131,9 @@ type PaymentOffer struct {
 // Check evaluates the offer against the policy and returns a descriptive
 // error when it must not be signed.
 func (p SpendPolicy) Check(offer *PaymentOffer) error {
+	if offer == nil {
+		return fmt.Errorf("nebula/x402: offer is required")
+	}
 	if err := p.checkResource(offer.ResourceURL); err != nil {
 		return err
 	}
@@ -126,7 +143,7 @@ func (p SpendPolicy) Check(offer *PaymentOffer) error {
 // checkRequirements validates everything except the resource URL: scheme,
 // network, USDC asset, recipient, and the amount cap.
 func (p SpendPolicy) checkRequirements(offer *PaymentOffer) error {
-	if p.RequireExactScheme && offer.Scheme != Scheme {
+	if offer.Scheme != Scheme {
 		return fmt.Errorf("nebula/x402: offer scheme %q is not %q", offer.Scheme, Scheme)
 	}
 	if offer.Network != Network {
@@ -153,11 +170,12 @@ func (p SpendPolicy) checkRequirements(offer *PaymentOffer) error {
 }
 
 func (p SpendPolicy) checkResource(resourceURL string) error {
-	if resourceURL == "" {
-		return fmt.Errorf("nebula/x402: offer carries no resource URL")
+	u, err := url.Parse(resourceURL)
+	if err != nil || u.Host == "" || u.User != nil || u.Fragment != "" || (u.Scheme != "https" && u.Scheme != "http") {
+		return fmt.Errorf("nebula/x402: offer requires an absolute HTTP(S) resource URL without credentials or fragment")
 	}
 	for _, h := range p.hosts() {
-		if strings.Contains(resourceURL, "://"+h+"/") || strings.HasSuffix(resourceURL, "://"+h) {
+		if strings.EqualFold(u.Host, h) && (u.Scheme == "https" || !strings.EqualFold(u.Hostname(), Host)) {
 			return nil
 		}
 	}
@@ -165,8 +183,11 @@ func (p SpendPolicy) checkResource(resourceURL string) error {
 }
 
 func (p SpendPolicy) checkRecipient(payTo string) error {
+	if strings.TrimSpace(payTo) == "" {
+		return fmt.Errorf("nebula/x402: offer has no recipient")
+	}
 	if len(p.AllowedRecipients) == 0 {
-		return nil
+		return fmt.Errorf("nebula/x402: AllowedRecipients is required")
 	}
 	for _, r := range p.AllowedRecipients {
 		if strings.EqualFold(r, payTo) {
@@ -214,9 +235,20 @@ func NewHTTPClient(base *http.Client, signer Signer, policy SpendPolicy) (*http.
 	if _, err := policy.maxAtomic(); err != nil {
 		return nil, err
 	}
+	if len(policy.AllowedRecipients) == 0 {
+		return nil, fmt.Errorf("nebula/x402: AllowedRecipients is required")
+	}
+	policy.AllowedHosts = append([]string(nil), policy.AllowedHosts...)
+	policy.AllowedRecipients = append([]string(nil), policy.AllowedRecipients...)
 	if base == nil {
 		base = http.DefaultClient
 	}
+	baseCopy := *base
+	inner := baseCopy.Transport
+	if inner == nil {
+		inner = http.DefaultTransport
+	}
+	baseCopy.Transport = &paymentTransport{inner: inner}
 	x402c := x402v2.Newx402Client(
 		x402v2.WithSpendControls(x402v2.SpendControls{
 			MaxAmountPerPayment: policy.MaxUSDCPerPayment,
@@ -226,16 +258,84 @@ func NewHTTPClient(base *http.Client, signer Signer, policy SpendPolicy) (*http.
 	x402c.Register(x402v2.Network(Network), evmexact.NewExactEvmScheme(signer, nil))
 	hc := x402http.Newx402HTTPClient(x402c)
 	hc.OnPaymentRequired(func(ctx context.Context, required x402v2.PaymentRequired, requestURL string) (*x402http.PaymentRequiredHookResult, error) {
-		resource := requestURL
-		if required.Resource != nil && strings.Contains(required.Resource.URL, "://") {
-			resource = required.Resource.URL
+		if required.X402Version != 2 || required.Resource == nil {
+			return nil, fmt.Errorf("nebula/x402: a v2 resource is required")
 		}
-		if err := policy.checkResource(resource); err != nil {
+		if err := policy.checkResource(requestURL); err != nil {
 			return nil, err
+		}
+		if err := policy.checkResource(required.Resource.URL); err != nil {
+			return nil, err
+		}
+		requested, _ := url.Parse(requestURL)
+		offered, _ := url.Parse(required.Resource.URL)
+		if requested.Scheme != offered.Scheme || !strings.EqualFold(requested.Host, offered.Host) || requested.EscapedPath() != offered.EscapedPath() || requested.Query().Encode() != offered.Query().Encode() {
+			return nil, fmt.Errorf("nebula/x402: offer resource does not match the requested URL")
 		}
 		return &x402http.PaymentRequiredHookResult{}, nil
 	})
-	return x402http.WrapHTTPClientWithPayment(base, hc), nil
+	wrapped := x402http.WrapHTTPClientWithPayment(&baseCopy, hc)
+	// A redirect must never forward a signed payment or initiate a new payment.
+	wrapped.CheckRedirect = func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }
+	return wrapped, nil
+}
+
+// paymentTransport observes the signed leg inside the official wrapper. It
+// retains only request identity and receipts, never the signed payload.
+type paymentTransport struct{ inner http.RoundTripper }
+
+func (t *paymentTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	if req.Header.Get("PAYMENT-SIGNATURE") != "" {
+		// net/http may silently replay GET on a reused connection after EOF.
+		// An empty, non-replayable body prevents that retry after payment was sent.
+		req = req.Clone(req.Context())
+		req.GetBody = nil
+		if req.Body == nil || req.Body == http.NoBody {
+			req.Body = io.NopCloser(strings.NewReader(""))
+		}
+	}
+	resp, err := t.inner.RoundTrip(req)
+	if req.Header.Get("PAYMENT-SIGNATURE") == "" {
+		// Reject v1 before the official wrapper's v1 path can bypass v2 hooks.
+		if err == nil && resp.StatusCode == http.StatusPaymentRequired {
+			if _, err := DecodePaymentRequired(resp.Header); err != nil {
+				resp.Body.Close()
+				return nil, err
+			}
+		}
+		return resp, err
+	}
+	state := &nebula.PaymentUncertainError{URL: req.URL.String(), Err: err}
+	if resp != nil {
+		state.Metadata = nebula.ResponseMetadata{StatusCode: resp.StatusCode, Headers: resp.Header.Clone(), RequestID: resp.Header.Get("X-Request-Id")}
+		state.Metadata.PaymentReceipt, _ = DecodePaymentResponse(resp.Header)
+	}
+	if err != nil {
+		return nil, state
+	}
+	if resp.StatusCode >= 500 || resp.StatusCode >= 300 && resp.StatusCode < 400 {
+		body, _ := io.ReadAll(io.LimitReader(resp.Body, 8192))
+		resp.Body.Close()
+		state.Err = &nebula.APIError{StatusCode: resp.StatusCode, Headers: resp.Header.Clone(), Metadata: state.Metadata, Body: body, Message: http.StatusText(resp.StatusCode)}
+		return nil, state
+	}
+	resp.Body = &paymentBody{ReadCloser: resp.Body, state: state}
+	return resp, nil
+}
+
+type paymentBody struct {
+	io.ReadCloser
+	state *nebula.PaymentUncertainError
+}
+
+func (b *paymentBody) Read(p []byte) (int, error) {
+	n, err := b.ReadCloser.Read(p)
+	if err != nil && !errors.Is(err, io.EOF) {
+		state := *b.state
+		state.Err = err
+		return n, &state
+	}
+	return n, err
 }
 
 // NewClient builds a ready Nebula client bound to the x402 surface with the
@@ -256,6 +356,9 @@ func NewClient(signer Signer, policy SpendPolicy, opts ...nebula.Option) (*nebul
 // Pass httpClient nil to use a bare client; the server must respond 402 with
 // the offer header for the decode to succeed.
 func PreviewOffer(ctx context.Context, httpClient *http.Client, method, fullURL string) (*PaymentOffer, error) {
+	if method != http.MethodGet {
+		return nil, fmt.Errorf("nebula/x402: preview requires GET")
+	}
 	if httpClient == nil {
 		httpClient = http.DefaultClient
 	}
@@ -269,6 +372,9 @@ func PreviewOffer(ctx context.Context, httpClient *http.Client, method, fullURL 
 		return nil, err
 	}
 	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusPaymentRequired {
+		return nil, fmt.Errorf("nebula/x402: preview expected HTTP 402, got %d", resp.StatusCode)
+	}
 	offer, err := DecodePaymentRequired(resp.Header)
 	if err != nil {
 		return nil, err
@@ -292,6 +398,9 @@ func DecodePaymentRequired(h http.Header) (*PaymentOffer, error) {
 	if err := json.Unmarshal(decoded, &pr); err != nil {
 		return nil, fmt.Errorf("nebula/x402: malformed payment offer: %w", err)
 	}
+	if pr.X402Version != 2 || pr.Resource == nil || pr.Resource.URL == "" || len(pr.Accepts) == 0 {
+		return nil, fmt.Errorf("nebula/x402: incomplete or unsupported payment offer")
+	}
 	offer := &PaymentOffer{Raw: json.RawMessage(decoded)}
 	if pr.Resource != nil {
 		offer.ResourceURL = pr.Resource.URL
@@ -304,6 +413,9 @@ func DecodePaymentRequired(h http.Header) (*PaymentOffer, error) {
 		offer.PayTo = a.PayTo
 		offer.MaxTimeoutSeconds = a.MaxTimeoutSeconds
 		offer.Amount, _ = new(big.Int).SetString(a.Amount, 10)
+	}
+	if offer.Amount == nil || offer.Amount.Sign() < 0 {
+		return nil, fmt.Errorf("nebula/x402: invalid offer amount")
 	}
 	return offer, nil
 }

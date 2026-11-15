@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"io"
 	"math/big"
 	"net/http"
 	"net/http/httptest"
@@ -74,6 +75,7 @@ func testPolicy(srv *httptest.Server) SpendPolicy {
 	return SpendPolicy{
 		MaxUSDCPerPayment: "0.01",
 		AllowedHosts:      []string{serverHost(srv)},
+		AllowedRecipients: []string{"0xRecipient1234", "0xR"},
 	}
 }
 
@@ -232,7 +234,7 @@ func TestMaxAtomicValidation(t *testing.T) {
 	if _, err := NewHTTPClient(nil, &fakeSigner{}, SpendPolicy{MaxUSDCPerPayment: "0.0000001"}); err == nil {
 		t.Fatal("sub-micro cap must be rejected")
 	}
-	if _, err := NewHTTPClient(nil, &fakeSigner{}, SpendPolicy{MaxUSDCPerPayment: "0.01"}); err != nil {
+	if _, err := NewHTTPClient(nil, &fakeSigner{}, SpendPolicy{MaxUSDCPerPayment: "0.01", AllowedRecipients: []string{"0xR"}}); err != nil {
 		t.Fatalf("valid cap rejected: %v", err)
 	}
 }
@@ -294,4 +296,128 @@ func TestDecodePaymentResponse(t *testing.T) {
 	}
 }
 
-var _ = errors.Is
+func TestUncertainSignedPaymentsNeverRepeat(t *testing.T) {
+	for _, failure := range []string{"503", "lost", "body"} {
+		lost := failure == "lost"
+		var signed atomic.Int32
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.Header.Get("PAYMENT-SIGNATURE") == "" {
+				w.Header().Set("PAYMENT-REQUIRED", offerHeader(t, "http://"+r.Host+r.URL.String(), Network, USDCAsset, "1250", "0xR"))
+				w.WriteHeader(402)
+				return
+			}
+			signed.Add(1)
+			if lost {
+				conn, _, err := w.(http.Hijacker).Hijack()
+				if err != nil {
+					t.Error(err)
+					return
+				}
+				conn.Close()
+				return
+			}
+			w.Header().Set("X-Request-Id", "req-paid")
+			w.Header().Set("PAYMENT-RESPONSE", base64.StdEncoding.EncodeToString([]byte(`{"transaction":"0xtest"}`)))
+			if failure == "body" {
+				w.Header().Set("Content-Length", "100")
+				_, _ = io.WriteString(w, "{")
+				return
+			}
+			w.WriteHeader(503)
+		}))
+		signer := &fakeSigner{address: "0xBuyer"}
+		hc, err := NewHTTPClient(nil, signer, testPolicy(srv))
+		if err != nil {
+			t.Fatal(err)
+		}
+		client, err := nebula.NewX402Client(hc, nebula.WithBaseURL(srv.URL))
+		if err != nil {
+			t.Fatal(err)
+		}
+		_, err = client.Lookup.ListAssets(context.Background(), nil)
+		srv.Close()
+		var state *nebula.PaymentUncertainError
+		if !errors.Is(err, nebula.ErrPaymentUncertain) || !errors.As(err, &state) {
+			t.Fatalf("lost=%v err=%v", lost, err)
+		}
+		if signed.Load() != 1 || signer.signed != 1 {
+			t.Fatalf("signed requests=%d signatures=%d", signed.Load(), signer.signed)
+		}
+		if state.URL == "" {
+			t.Fatal("request identity missing")
+		}
+		if !lost && (state.Metadata.RequestID != "req-paid" || len(state.Metadata.PaymentReceipt) == 0) {
+			t.Fatalf("lost receipt or status: %+v", state)
+		}
+		if failure == "503" && !errors.Is(err, nebula.ErrServiceUnavailable) {
+			t.Fatalf("lost HTTP error: %v", err)
+		}
+		if failure == "body" && !errors.Is(err, io.ErrUnexpectedEOF) {
+			t.Fatalf("lost read error: %v", err)
+		}
+	}
+}
+
+func TestResourcePolicyCannotBeBypassed(t *testing.T) {
+	p := SpendPolicy{MaxUSDCPerPayment: "0.01", AllowedRecipients: []string{"0xR"}}
+	for _, resource := range []string{
+		"https://evil.example/#https://" + Host + "/assets",
+		"https://evil.example/path/https://" + Host + "/assets",
+		"https://" + Host + "@evil.example/assets",
+		"http://" + Host + "/assets",
+	} {
+		if err := p.Check(&PaymentOffer{ResourceURL: resource, Network: Network, Scheme: Scheme, Asset: USDCAsset, Amount: mustBig("1"), PayTo: "0xR"}); err == nil {
+			t.Errorf("accepted %s", resource)
+		}
+	}
+	if err := p.Check(nil); err == nil {
+		t.Fatal("nil offer accepted")
+	}
+}
+
+func TestRejectsMismatchedResourceBeforeSigning(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("PAYMENT-REQUIRED", offerHeader(t, "http://"+r.Host+"/different", Network, USDCAsset, "1250", "0xR"))
+		w.WriteHeader(402)
+	}))
+	defer srv.Close()
+	signer := &fakeSigner{address: "0xBuyer"}
+	hc, err := NewHTTPClient(nil, signer, testPolicy(srv))
+	if err != nil {
+		t.Fatal(err)
+	}
+	client, err := nebula.NewX402Client(hc, nebula.WithBaseURL(srv.URL))
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = client.Lookup.ListAssets(context.Background(), nil)
+	if err == nil || signer.signed != 0 {
+		t.Fatalf("signed=%d err=%v", signer.signed, err)
+	}
+}
+
+func TestPreviewRequiresPaymentStatus(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { _, _ = io.WriteString(w, `{}`) }))
+	defer srv.Close()
+	if _, err := PreviewOffer(context.Background(), nil, http.MethodGet, srv.URL); err == nil {
+		t.Fatal("non-402 preview accepted")
+	}
+	if _, err := PreviewOffer(context.Background(), nil, http.MethodPost, srv.URL); err == nil {
+		t.Fatal("POST preview accepted")
+	}
+}
+
+func TestPolicyRequiresRecipientAndDecimalCap(t *testing.T) {
+	if _, err := NewHTTPClient(nil, &fakeSigner{}, SpendPolicy{MaxUSDCPerPayment: "0.01"}); err == nil {
+		t.Fatal("missing recipients accepted")
+	}
+	for _, cap := range []string{"1/2", "1e-2", "0.0000001", "-1", "NaN"} {
+		if _, err := (SpendPolicy{MaxUSDCPerPayment: cap}).maxAtomic(); err == nil {
+			t.Errorf("accepted cap %q", cap)
+		}
+	}
+	p := SpendPolicy{MaxUSDCPerPayment: "0.01", AllowedRecipients: []string{"0xR"}}
+	if err := p.Check(&PaymentOffer{ResourceURL: nebula.X402BaseURL + "/assets", Network: Network, Scheme: "upto", Asset: USDCAsset, Amount: mustBig("1"), PayTo: "0xR"}); err == nil {
+		t.Fatal("non-exact scheme accepted by default")
+	}
+}

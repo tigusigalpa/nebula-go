@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"mime"
 	"net/http"
 	"strings"
 	"sync"
@@ -21,7 +22,9 @@ import (
 //	if err != nil { return err }
 //	defer stream.Close()
 //	for chunk := range stream.Events() {
-//	    if d := chunk.Choices[0].Delta; d != nil { fmt.Print(d.Content) }
+//	    for _, choice := range chunk.Choices {
+//	        if d := choice.Delta; d != nil && d.Content != nil { fmt.Print(*d.Content) }
+//	    }
 //	}
 //	if err := stream.Err(); err != nil { return err }
 type ChatStream struct {
@@ -30,6 +33,7 @@ type ChatStream struct {
 	once   sync.Once
 	body   io.Closer
 	cancel context.CancelFunc
+	ctx    context.Context
 	err    error
 	meta   ResponseMetadata
 	mu     sync.Mutex
@@ -77,7 +81,7 @@ func streamSSE(ctx context.Context, c *Client, path string, body any, op string)
 		return nil, fmt.Errorf("nebula: %s: %w", op, ErrNotX402Eligible)
 	}
 	t := c.tr
-	u, err := t.buildURL(path, nil)
+	u, err := t.buildURL(ctx, path, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -85,7 +89,7 @@ func streamSSE(ctx context.Context, c *Client, path string, body any, op string)
 	if err != nil {
 		return nil, &ValidationError{Op: op, Field: "body", Msg: "cannot serialize request body"}
 	}
-	ctx, cancel := context.WithCancel(ctx)
+	ctx, cancel := context.WithTimeout(ctx, t.cfg.timeout)
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, u, bytes.NewReader(buf))
 	if err != nil {
 		cancel()
@@ -107,16 +111,23 @@ func streamSSE(ctx context.Context, c *Client, path string, body any, op string)
 		cancel()
 		return nil, &TransportError{Op: op, Err: err}
 	}
-	if resp.StatusCode >= 400 {
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		defer resp.Body.Close()
+		err := decodeAPIError(resp, op)
 		cancel()
-		return nil, decodeAPIError(resp, op)
+		return nil, err
+	}
+	if mediaType, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type")); err != nil || mediaType != "text/event-stream" {
+		resp.Body.Close()
+		cancel()
+		return nil, &StreamError{Op: op, Err: errors.New("expected Content-Type text/event-stream")}
 	}
 	s := &ChatStream{
 		events: make(chan *ChatCompletionResponse, 16),
 		done:   make(chan struct{}),
 		body:   resp.Body,
 		cancel: cancel,
+		ctx:    ctx,
 		meta:   parseMetadata(resp.StatusCode, resp.Header),
 	}
 	go s.read(resp.Body, op)
@@ -139,18 +150,21 @@ func (s *ChatStream) read(body io.Reader, op string) {
 		if payload == "[DONE]" {
 			return false
 		}
+		var frame struct {
+			Error   json.RawMessage `json:"error"`
+			Message string          `json:"message"`
+		}
+		if json.Unmarshal([]byte(payload), &frame) == nil && len(frame.Error) > 0 && string(frame.Error) != "false" && string(frame.Error) != "null" {
+			message := frame.Message
+			if message == "" {
+				message = "API error event"
+			}
+			s.setErr(&StreamError{Op: op, Err: errors.New(message)})
+			return false
+		}
 		var chunk ChatCompletionResponse
-		if err := json.Unmarshal([]byte(payload), &chunk); err != nil {
-			// an API error frame inside the stream
-			var apiErr struct {
-				Error   *bool   `json:"error"`
-				Message *string `json:"message"`
-			}
-			if json.Unmarshal([]byte(payload), &apiErr) == nil && apiErr.Message != nil {
-				s.setErr(&StreamError{Op: op, Err: errors.New(*apiErr.Message)})
-				return false
-			}
-			s.setErr(&StreamError{Op: op, Err: fmt.Errorf("malformed SSE data: %.200s", payload)})
+		if err := json.Unmarshal([]byte(payload), &chunk); err != nil || len(chunk.Choices) == 0 && chunk.Usage == nil {
+			s.setErr(&StreamError{Op: op, Err: errors.New("malformed SSE completion data")})
 			return false
 		}
 		chunk.Metadata = s.meta
@@ -158,6 +172,9 @@ func (s *ChatStream) read(body io.Reader, op string) {
 		case s.events <- &chunk:
 			return true
 		case <-s.done:
+			return false
+		case <-s.ctx.Done():
+			s.setErr(&StreamError{Op: op, Err: s.ctx.Err()})
 			return false
 		}
 	}
@@ -173,22 +190,26 @@ func (s *ChatStream) read(body io.Reader, op string) {
 			continue // comment/heartbeat
 		}
 		if strings.HasPrefix(line, "data:") {
+			if dataBuf.Len()+len(line) > 4*1024*1024 {
+				s.setErr(&StreamError{Op: op, Err: errors.New("SSE event exceeds 4 MiB")})
+				return
+			}
 			dataBuf.WriteString(strings.TrimPrefix(line, "data:"))
 			dataBuf.WriteByte('\n')
 			continue
 		}
 		// ignore event:, id:, retry: fields — data carries the payload
 	}
-	if err := scanner.Err(); err != nil {
-		if !errors.Is(err, context.Canceled) && !errors.Is(err, io.EOF) {
-			select {
-			case <-s.done:
-			default:
-				s.setErr(&StreamError{Op: op, Err: err})
-			}
-		}
+	select {
+	case <-s.done: // Explicit Close is a normal way to stop early.
 		return
+	default:
 	}
-	// EOF without [DONE]: flush any buffered data then end.
-	dataBuf.Reset()
+	if err := s.ctx.Err(); err != nil {
+		s.setErr(&StreamError{Op: op, Err: err})
+	} else if err := scanner.Err(); err != nil {
+		s.setErr(&StreamError{Op: op, Err: err})
+	} else {
+		s.setErr(&StreamError{Op: op, Err: io.ErrUnexpectedEOF})
+	}
 }

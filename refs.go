@@ -1,5 +1,15 @@
 package nebula
 
+func validateClassFilter(asset *AssetRef, class *AssetClass, subject *SubjectRef, op string) error {
+	if class == nil {
+		return nil
+	}
+	if asset != nil || subject != nil {
+		return &ValidationError{Op: op, Field: "asset_class", Msg: "standalone class filter cannot be combined with asset or subject selector"}
+	}
+	return class.valid(op, "asset_class")
+}
+
 // AssetRef selects one market asset: the pair (asset_id, asset_class) that
 // /assets and /search return together. Carrying the pair in one value object
 // makes it impossible to send a bare asset_id without its class.

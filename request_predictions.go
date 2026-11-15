@@ -11,13 +11,16 @@ import (
 // PredictionsRequest carries the query parameters of `list_prediction_markets` (GET /predictions).
 // Docs: https://docs.hiddensystems.ai/nebula/reference/get-predictions/
 type PredictionsRequest struct {
-	Asset    *AssetRef
-	Subject  *SubjectRef
-	Query    *string
-	Provider *PredictionProvider
-	Status   *PredictionStatus
-	Limit    *int
-	Offset   *int
+	Asset *AssetRef
+	// AssetClass filters markets without selecting an individual asset.
+	// Use Asset.Class instead when Asset is provided.
+	AssetClass *AssetClass
+	Subject    *SubjectRef
+	Query      *string
+	Provider   *PredictionProvider
+	Status     *PredictionStatus
+	Limit      *int
+	Offset     *int
 }
 
 // query serializes the request per the OpenAPI parameter contract:
@@ -30,6 +33,9 @@ func (r *PredictionsRequest) query() (url.Values, error) {
 		return nil, err
 	}
 	v := url.Values{}
+	if r.AssetClass != nil {
+		v.Set("asset_class", string(*r.AssetClass))
+	}
 	if r.Asset != nil {
 		v.Set("asset_id", r.Asset.ID)
 		v.Set("asset_class", string(r.Asset.Class))
@@ -58,6 +64,9 @@ func (r *PredictionsRequest) query() (url.Values, error) {
 // validate enforces the documented client-side rules of `list_prediction_markets`
 // before any HTTP call is made.
 func (r *PredictionsRequest) validate() error {
+	if err := validateClassFilter(r.Asset, r.AssetClass, r.Subject, "list_prediction_markets"); err != nil {
+		return err
+	}
 	if r.Asset != nil && r.Subject != nil {
 		return &ValidationError{Op: "list_prediction_markets", Field: "subject", Msg: "subject and asset selectors are mutually exclusive"}
 	}

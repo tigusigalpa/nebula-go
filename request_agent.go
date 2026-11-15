@@ -37,12 +37,17 @@ func (r *ChatCompletionRequest) validate() error {
 		return &ValidationError{Op: "create_chat_completion", Field: "messages", Msg: "at least one message is required"}
 	}
 	for i, m := range r.Messages {
-		if m.Role == "" {
-			return &ValidationError{Op: "create_chat_completion", Field: "messages", Msg: fmt.Sprintf("message %d: role is required", i)}
+		switch m.Role {
+		case ChatRoleSystem, ChatRoleDeveloper, ChatRoleUser, ChatRoleAssistant:
+		default:
+			return &ValidationError{Op: "create_chat_completion", Field: "messages", Msg: fmt.Sprintf("message %d: invalid role", i)}
 		}
 		if m.Content == "" {
 			return &ValidationError{Op: "create_chat_completion", Field: "messages", Msg: fmt.Sprintf("message %d: content must be non-empty", i)}
 		}
+	}
+	if r.ThinkingMode != nil && *r.ThinkingMode != ThinkingModeAuto && *r.ThinkingMode != ThinkingModeDeep {
+		return &ValidationError{Op: "create_chat_completion", Field: "thinking_mode", Msg: "must be auto or deep"}
 	}
 	return nil
 }
