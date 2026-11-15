@@ -7,7 +7,7 @@ func validateClassFilter(asset *AssetRef, class *AssetClass, subject *SubjectRef
 	if asset != nil || subject != nil {
 		return &ValidationError{Op: op, Field: "asset_class", Msg: "standalone class filter cannot be combined with asset or subject selector"}
 	}
-	return class.valid(op, "asset_class")
+	return nil // The operation's generated query rules validate enum values.
 }
 
 // AssetRef selects one market asset: the pair (asset_id, asset_class) that
@@ -23,16 +23,6 @@ type SubjectRef struct {
 	ID string
 }
 
-func (a *AssetRef) requirePair(op string) error {
-	if a == nil || a.ID == "" {
-		return &ValidationError{Op: op, Field: "asset_id", Msg: "asset selector is required"}
-	}
-	if a.Class == "" {
-		return &ValidationError{Op: op, Field: "asset_class", Msg: "asset_class is required with asset_id"}
-	}
-	return a.Class.valid(op, "asset_class")
-}
-
 func (a *AssetRef) optionalPair(op string) error {
 	if a == nil {
 		return nil
@@ -43,13 +33,5 @@ func (a *AssetRef) optionalPair(op string) error {
 	if a.Class == "" {
 		return &ValidationError{Op: op, Field: "asset_class", Msg: "asset_class is required with asset_id"}
 	}
-	return a.Class.valid(op, "asset_class")
-}
-
-func (a AssetClass) valid(op, field string) error {
-	switch a {
-	case AssetClassEquity, AssetClassCommodity, AssetClassIndex, AssetClassCrypto:
-		return nil
-	}
-	return &ValidationError{Op: op, Field: field, Msg: "must be one of equity, commodity, index, crypto"}
+	return nil // The operation's generated query rules validate enum values.
 }

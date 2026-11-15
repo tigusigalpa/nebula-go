@@ -37,7 +37,7 @@ From your Go module:
 go get github.com/tigusigalpa/nebula-go
 ```
 
-Requires **Go 1.24 or newer**, including the module's x402 dependency graph. The SDK version declared in this source tree is `0.2.0`. The core package does not import the payment adapter; the adapter's dependencies are still declared in the same module.
+Requires **Go 1.24 or newer**, including the module's x402 dependency graph. The SDK version declared in this source tree is `0.3.0`. The core package does not import the payment adapter; the adapter's dependencies are still declared in the same module.
 
 Make your API key available to your application. For a local session, set an environment variable:
 
@@ -171,7 +171,7 @@ Use these options to adjust the defaults for your application:
 | Backoff | 250 ms initial delay, 5 s cap, with jitter | `WithRetry` or `WithRetryPolicy` |
 | Locale | Unset; uses the server default | `WithLocale` |
 | Locale transport | `X-Nebula-Locale` header | `WithLocaleMode` |
-| User agent | `nebula-go/0.2.0` | `WithUserAgent` |
+| User agent | `nebula-go/0.3.0` | `WithUserAgent` |
 | Debug logging | Off | `WithLogger` |
 
 Bearer mode sends `Authorization: Bearer …` instead of `X-API-Key`. JSON calls use `Accept: application/json`; Agent streams request `text/event-stream`.
@@ -622,11 +622,13 @@ If you're looking for a particular part of the implementation:
 | [resources/openapi/nebula-openapi.json](resources/openapi/nebula-openapi.json) | Pinned upstream contract |
 | [testdata/](testdata/) | Response fixtures |
 | [request_contract_test.go](request_contract_test.go), [contract_test.go](contract_test.go) | Contract checks through public service methods |
-| [tools/querygen/](tools/querygen/) | Query-validation rule generator |
+| [tools/nebula-gen/](tools/nebula-gen/) | OpenAPI generator for requests, responses, enums, service methods and validation |
 
 The coverage guard connects all **41 operations** to exercised service calls, docs, fixtures and x402 eligibility. Independent contract tests check **173 query parameters**, the chat body and **750 response properties**, including nullable fields, empty collections, large integers, fractional timestamps and unknown fields retained in `Raw`. These checks verify the pinned contract; they do not establish live API compatibility.
 
-`go generate` rebuilds query-validation rules only. The original full request/response generator is not included; maintain models alongside the contract and fixtures. See [Contributing](CONTRIBUTING.md) for the update workflow and [Changelog](CHANGELOG.md) for changes between versions.
+`go generate ./...` rebuilds the SDK surface from the pinned OpenAPI: request structs and serialization, typed responses, enums, service methods, query-validation rules and x402 eligibility. It works offline and can restore generated files into an empty directory. To check for missing, edited or obsolete generated files without writing anything, run `go run ./tools/nebula-gen -check`.
+
+Public Go naming conventions live in `tools/nebula-gen/compat.json`; business rules involving several parameters live in `request_validation.go`. Keep changes to schema-derived fields in the OpenAPI rather than editing generated files. See the [generator guide](docs/GENERATION.md), [Contributing](CONTRIBUTING.md) and [Changelog](CHANGELOG.md).
 
 [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md) · [Changelog](CHANGELOG.md)
 

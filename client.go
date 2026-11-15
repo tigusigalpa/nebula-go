@@ -8,7 +8,7 @@ import (
 )
 
 // Version is the SDK release.
-const Version = "0.2.0"
+const Version = "0.3.0"
 
 // BaseURL is the account-authenticated API base.
 const BaseURL = "https://nebula-api.hiddensystems.ai/api/v1/public"

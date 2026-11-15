@@ -24,10 +24,11 @@ jobs:
           check-latest: true
       - name: Check formatting
         run: test -z "$(gofmt -l .)"
-      - name: Check generated query rules
+      - name: Check generated SDK
         run: |
+          go run ./tools/nebula-gen -check
           go generate ./...
-          git diff --exit-code -- validation_rules.go
+          git diff --exit-code
       - name: Verify dependencies
         run: |
           go mod verify

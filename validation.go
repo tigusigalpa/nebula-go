@@ -1,6 +1,6 @@
 package nebula
 
-//go:generate go run ./tools/querygen
+//go:generate go run ./tools/nebula-gen
 
 import (
 	"math"
@@ -19,6 +19,7 @@ type queryRule struct {
 	enum                 []string
 	min, max             *float64
 	minLength, maxLength int
+	minItems, maxItems   *int
 }
 
 // validateQuery closes gaps that typed nil requests and extensible string types
@@ -29,6 +30,18 @@ func validateQuery(op string, q url.Values) error {
 		values, present := q[rule.name]
 		if rule.required && (!present || len(values) == 0 || strings.TrimSpace(values[0]) == "") {
 			return invalid(rule.name, "required")
+		}
+		if present && (rule.minItems != nil || rule.maxItems != nil) {
+			count := len(values)
+			if rule.csv {
+				count = 0
+				for _, value := range values {
+					count += len(strings.Split(value, ","))
+				}
+			}
+			if rule.minItems != nil && count < *rule.minItems || rule.maxItems != nil && count > *rule.maxItems {
+				return invalid(rule.name, "invalid array length")
+			}
 		}
 		for _, value := range values {
 			items := []string{value}
@@ -52,14 +65,5 @@ func validateQuery(op string, q url.Values) error {
 			}
 		}
 	}
-	if q.Has("subject_id") && strings.TrimSpace(q.Get("subject_id")) == "" {
-		return invalid("subject_id", "must be non-empty")
-	}
-	switch op {
-	case "get_emotions", "get_mindshare", "get_related_subjects", "get_sentiment_timeframes":
-		if !q.Has("asset_id") && !q.Has("subject_id") {
-			return invalid("selector", "asset or subject selector is required")
-		}
-	}
-	return nil
+	return validateRelations(op, q)
 }

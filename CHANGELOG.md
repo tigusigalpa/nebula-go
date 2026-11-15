@@ -5,6 +5,15 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-15
+
+### Added
+- Restore the complete offline OpenAPI generator for requests, typed responses, enums, service methods, query validation and x402 eligibility, with read-only drift checking.
+- Generator tests for clean reconstruction, deterministic output, v0.2.0 public API compatibility, local references and schema evolution in a separately compiled SDK.
+
+### Changed
+- Keep public naming overrides and cross-parameter business rules outside generated files; CI now checks the complete generated SDK.
+
 ## [0.2.0] - 2026-11-15
 
 ### Added

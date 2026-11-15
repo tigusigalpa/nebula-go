@@ -1,0 +1,958 @@
+{
+  "operations": {
+    "get_account": {
+      "group": "account",
+      "service": "Account",
+      "method": "Get",
+      "request": "",
+      "response": "AccountResponse"
+    },
+    "create_chat_completion": {
+      "group": "agent",
+      "service": "Agent",
+      "method": "CreateChatCompletion",
+      "request": "ChatCompletionRequest",
+      "response": "ChatCompletionResponse"
+    },
+    "list_clusters": {
+      "group": "clusters",
+      "service": "Clusters",
+      "method": "List",
+      "request": "ClustersRequest",
+      "response": "ClustersResponse"
+    },
+    "compare_clusters": {
+      "group": "clusters",
+      "service": "Clusters",
+      "method": "Comparison",
+      "request": "ClustersComparisonRequest",
+      "response": "ClustersComparisonResponse"
+    },
+    "get_divisive_assets": {
+      "group": "clusters",
+      "service": "Clusters",
+      "method": "DivisiveAssets",
+      "request": "DivisiveAssetsRequest",
+      "response": "DivisiveAssetsResponse"
+    },
+    "compare_hype_cycles": {
+      "group": "clusters",
+      "service": "Clusters",
+      "method": "ComparisonHypeCycles",
+      "request": "ComparisonHypeCyclesRequest",
+      "response": "ComparisonHypeCyclesResponse"
+    },
+    "compare_cluster_traits": {
+      "group": "clusters",
+      "service": "Clusters",
+      "method": "ComparisonTraits",
+      "request": "ComparisonTraitsRequest",
+      "response": "ComparisonTraitsResponse"
+    },
+    "get_cluster_hype_cycles": {
+      "group": "clusters",
+      "service": "Clusters",
+      "method": "HypeCycles",
+      "request": "ClusterHypeCyclesRequest",
+      "response": "ClusterHypeCyclesResponse"
+    },
+    "get_cluster_overlap": {
+      "group": "clusters",
+      "service": "Clusters",
+      "method": "Overlap",
+      "request": "ClusterOverlapRequest",
+      "response": "ClusterOverlapResponse"
+    },
+    "get_cluster_profile": {
+      "group": "clusters",
+      "service": "Clusters",
+      "method": "Profile",
+      "request": "ClusterProfileRequest",
+      "response": "ClusterProfileResponse"
+    },
+    "get_cluster_rotation": {
+      "group": "clusters",
+      "service": "Clusters",
+      "method": "Rotation",
+      "request": "ClusterRotationRequest",
+      "response": "ClusterRotationResponse"
+    },
+    "get_cluster_stances": {
+      "group": "clusters",
+      "service": "Clusters",
+      "method": "Stances",
+      "request": "ClusterStancesRequest",
+      "response": "ClusterStancesResponse"
+    },
+    "screener": {
+      "group": "discovery",
+      "service": "Discovery",
+      "method": "Screener",
+      "request": "ScreenerRequest",
+      "response": "ScreenerResponse"
+    },
+    "get_top_momentum": {
+      "group": "discovery",
+      "service": "Discovery",
+      "method": "TopMomentum",
+      "request": "TopMomentumRequest",
+      "response": "ScreenerResponse"
+    },
+    "get_top_trending": {
+      "group": "discovery",
+      "service": "Discovery",
+      "method": "TopTrending",
+      "request": "TopTrendingRequest",
+      "response": "ScreenerResponse"
+    },
+    "list_forecast_assets": {
+      "group": "forecasts",
+      "service": "Forecasts",
+      "method": "ListAssets",
+      "request": "ForecastAssetsRequest",
+      "response": "ForecastAssetsResponse"
+    },
+    "get_mindshare_forecast": {
+      "group": "forecasts",
+      "service": "Forecasts",
+      "method": "Mindshare",
+      "request": "MindshareForecastRequest",
+      "response": "MindshareForecastResponse"
+    },
+    "get_sentiment_forecast": {
+      "group": "forecasts",
+      "service": "Forecasts",
+      "method": "Sentiment",
+      "request": "SentimentForecastRequest",
+      "response": "SentimentForecastResponse"
+    },
+    "list_calendar_events": {
+      "group": "intelligence",
+      "service": "Intelligence",
+      "method": "CalendarEvents",
+      "request": "CalendarEventsRequest",
+      "response": "CalendarEventsResponse"
+    },
+    "list_insights": {
+      "group": "intelligence",
+      "service": "Intelligence",
+      "method": "Insights",
+      "request": "InsightsRequest",
+      "response": "InsightsResponse"
+    },
+    "get_insight_attention": {
+      "group": "intelligence",
+      "service": "Intelligence",
+      "method": "InsightAttention",
+      "request": "InsightAttentionRequest",
+      "response": "InsightAttentionResponse"
+    },
+    "list_assets": {
+      "group": "lookup",
+      "service": "Lookup",
+      "method": "ListAssets",
+      "request": "ListAssetsRequest",
+      "response": "ListAssetsResponse",
+      "standalone_class": true
+    },
+    "search": {
+      "group": "lookup",
+      "service": "Lookup",
+      "method": "Search",
+      "request": "SearchRequest",
+      "response": "SearchResponse"
+    },
+    "list_subjects": {
+      "group": "lookup",
+      "service": "Lookup",
+      "method": "ListSubjects",
+      "request": "ListSubjectsRequest",
+      "response": "ListSubjectsResponse"
+    },
+    "get_price_history": {
+      "group": "market_data",
+      "service": "MarketData",
+      "method": "PriceHistory",
+      "request": "PriceHistoryRequest",
+      "response": "PriceHistoryResponse"
+    },
+    "get_calls": {
+      "group": "market_sentiment",
+      "service": "MarketSentiment",
+      "method": "Calls",
+      "request": "CallsRequest",
+      "response": "CallsResponse"
+    },
+    "get_call_returns": {
+      "group": "market_sentiment",
+      "service": "MarketSentiment",
+      "method": "CallReturns",
+      "request": "CallReturnsRequest",
+      "response": "CallReturnsResponse"
+    },
+    "get_conviction_index": {
+      "group": "market_sentiment",
+      "service": "MarketSentiment",
+      "method": "ConvictionIndex",
+      "request": "ConvictionIndexRequest",
+      "response": "ConvictionIndexResponse"
+    },
+    "get_fear_greed_index": {
+      "group": "market_sentiment",
+      "service": "MarketSentiment",
+      "method": "FearGreedIndex",
+      "request": "FearGreedIndexRequest",
+      "response": "FearGreedIndexResponse"
+    },
+    "get_price_levels": {
+      "group": "market_sentiment",
+      "service": "MarketSentiment",
+      "method": "PriceLevels",
+      "request": "PriceLevelsRequest",
+      "response": "PriceLevelsResponse"
+    },
+    "get_social_volume_index": {
+      "group": "market_sentiment",
+      "service": "MarketSentiment",
+      "method": "SocialVolumeIndex",
+      "request": "SocialVolumeIndexRequest",
+      "response": "SocialVolumeIndexResponse"
+    },
+    "get_social_volume_profile": {
+      "group": "market_sentiment",
+      "service": "MarketSentiment",
+      "method": "SocialVolumeProfile",
+      "request": "SocialVolumeProfileRequest",
+      "response": "SocialVolumeProfileResponse"
+    },
+    "list_prediction_markets": {
+      "group": "predictions",
+      "service": "Predictions",
+      "method": "ListMarkets",
+      "request": "PredictionsRequest",
+      "response": "PredictionsResponse",
+      "standalone_class": true
+    },
+    "get_prediction_history": {
+      "group": "predictions",
+      "service": "Predictions",
+      "method": "History",
+      "request": "PredictionHistoryRequest",
+      "response": "PredictionHistoryResponse"
+    },
+    "get_prediction_market": {
+      "group": "predictions",
+      "service": "Predictions",
+      "method": "Market",
+      "request": "PredictionMarketRequest",
+      "response": "PredictionMarketResponse"
+    },
+    "get_emotions": {
+      "group": "social",
+      "service": "Social",
+      "method": "Emotions",
+      "request": "EmotionsRequest",
+      "response": "EmotionsResponse"
+    },
+    "get_mindshare": {
+      "group": "social",
+      "service": "Social",
+      "method": "Mindshare",
+      "request": "MindshareRequest",
+      "response": "MindshareResponse"
+    },
+    "get_related_subjects": {
+      "group": "social",
+      "service": "Social",
+      "method": "RelatedSubjects",
+      "request": "RelatedSubjectsRequest",
+      "response": "RelatedSubjectsResponse"
+    },
+    "get_sentiment": {
+      "group": "social",
+      "service": "Social",
+      "method": "Sentiment",
+      "request": "SentimentRequest",
+      "response": "SentimentResponse",
+      "standalone_class": true
+    },
+    "get_sentiment_timeframes": {
+      "group": "social",
+      "service": "Social",
+      "method": "SentimentTimeframes",
+      "request": "SentimentTimeframesRequest",
+      "response": "SentimentTimeframesResponse"
+    },
+    "get_social_momentum": {
+      "group": "social",
+      "service": "Social",
+      "method": "SocialMomentum",
+      "request": "SocialMomentumRequest",
+      "response": "SocialMomentumResponse",
+      "standalone_class": true
+    }
+  },
+  "objects": {
+    "get_account/response": "AccountResponse",
+    "get_account/response/properties/credits": "AccountResponseCredits",
+    "create_chat_completion/response": "ChatCompletionResponse",
+    "create_chat_completion/response/properties/choices/items": "ChatCompletionResponseChoice",
+    "create_chat_completion/response/properties/choices/items/properties/delta": "ChatCompletionResponseChoiceDelta",
+    "create_chat_completion/response/properties/choices/items/properties/message": "ChatCompletionResponseChoiceMessage",
+    "create_chat_completion/response/properties/usage": "ChatCompletionResponseUsage",
+    "create_chat_completion/request": "ChatCompletionRequest",
+    "create_chat_completion/request/properties/messages/items": "ChatMessage",
+    "list_clusters/response": "ClustersResponse",
+    "list_clusters/response/properties/clusters/items": "ClustersResponseCluster",
+    "list_clusters/response/properties/clusters/items/properties/series/items": "ClustersResponseClusterSeriesPoint",
+    "compare_clusters/response": "ClustersComparisonResponse",
+    "compare_clusters/response/properties/clusters/items": "ClustersComparisonResponseCluster",
+    "compare_clusters/response/properties/clusters/items/properties/series/items": "ClustersComparisonResponseClusterSeriesPoint",
+    "compare_clusters/response/properties/clusters/items/properties/trending_asset": "ClustersComparisonResponseClusterTrendingAsset",
+    "get_divisive_assets/response": "DivisiveAssetsResponse",
+    "get_divisive_assets/response/properties/assets/items": "DivisiveAssetsResponseAsset",
+    "get_divisive_assets/response/properties/assets/items/properties/cluster_stances/items": "DivisiveAssetsResponseAssetClusterStance",
+    "compare_hype_cycles/response": "ComparisonHypeCyclesResponse",
+    "compare_hype_cycles/response/properties/cycles/items": "ComparisonHypeCyclesResponseCycle",
+    "compare_hype_cycles/response/properties/cycles/items/properties/arrivals/items": "ComparisonHypeCyclesResponseCycleArrival",
+    "compare_hype_cycles/response/properties/cycles/items/properties/series/items": "ComparisonHypeCyclesResponseCycleSeriesPoint",
+    "compare_cluster_traits/response": "ComparisonTraitsResponse",
+    "compare_cluster_traits/response/properties/traits/items": "ComparisonTraitsResponseTrait",
+    "compare_cluster_traits/response/properties/traits/items/properties/clusters/items": "ComparisonTraitsResponseTraitCluster",
+    "get_cluster_hype_cycles/response": "ClusterHypeCyclesResponse",
+    "get_cluster_hype_cycles/response/properties/clusters/items": "ClusterHypeCyclesResponseCluster",
+    "get_cluster_hype_cycles/response/properties/curve/items": "ClusterHypeCyclesResponseCurveItem",
+    "get_cluster_overlap/response": "ClusterOverlapResponse",
+    "get_cluster_overlap/response/properties/peers/items": "ClusterOverlapResponsePeer",
+    "get_cluster_overlap/response/properties/peers/items/properties/shared_assets/items": "ClusterOverlapResponsePeerSharedAsset",
+    "get_cluster_profile/response": "ClusterProfileResponse",
+    "get_cluster_profile/response/properties/traits/items": "ClusterProfileResponseTrait",
+    "get_cluster_rotation/response": "ClusterRotationResponse",
+    "get_cluster_rotation/response/properties/gainers/items": "ClusterRotationResponseGainer",
+    "get_cluster_rotation/response/properties/losers/items": "ClusterRotationResponseGainer",
+    "get_cluster_rotation/response/properties/topic_changes/items": "ClusterRotationResponseTopicChange",
+    "get_cluster_rotation/response/properties/topic_series/items": "ClusterRotationResponseTopicSeriesPoint",
+    "get_cluster_rotation/response/properties/topic_series/items/properties/topics/items": "ClusterRotationResponseTopicSeriesPointTopic",
+    "get_cluster_stances/response": "ClusterStancesResponse",
+    "get_cluster_stances/response/properties/assets/items": "ClusterStancesResponseAsset",
+    "screener/response": "ScreenerResponse",
+    "screener/response/properties/results/items": "ScreenerResponseResult",
+    "get_top_momentum/response": "ScreenerResponse",
+    "get_top_momentum/response/properties/results/items": "ScreenerResponseResult",
+    "get_top_trending/response": "ScreenerResponse",
+    "get_top_trending/response/properties/results/items": "ScreenerResponseResult",
+    "list_forecast_assets/response": "ForecastAssetsResponse",
+    "list_forecast_assets/response/properties/assets/items": "ForecastAssetsResponseAsset",
+    "get_mindshare_forecast/response": "MindshareForecastResponse",
+    "get_mindshare_forecast/response/properties/series/items": "MindshareForecastResponseSeriesPoint",
+    "get_sentiment_forecast/response": "SentimentForecastResponse",
+    "get_sentiment_forecast/response/properties/series/items": "SentimentForecastResponseSeriesPoint",
+    "get_sentiment_forecast/response/properties/series/items/properties/bearish_posts": "SentimentForecastResponseSeriesPointBearishPosts",
+    "get_sentiment_forecast/response/properties/series/items/properties/bullish_posts": "SentimentForecastResponseSeriesPointBearishPosts",
+    "get_sentiment_forecast/response/properties/series/items/properties/neutral_posts": "SentimentForecastResponseSeriesPointBearishPosts",
+    "get_sentiment_forecast/response/properties/series/items/properties/sentiment_signal": "SentimentForecastResponseSeriesPointSentimentSignal",
+    "get_sentiment_forecast/response/properties/series/items/properties/total_posts": "SentimentForecastResponseSeriesPointBearishPosts",
+    "list_calendar_events/response": "CalendarEventsResponse",
+    "list_calendar_events/response/properties/calendar_events/items": "CalendarEventsResponseCalendarEvent",
+    "list_calendar_events/response/properties/calendar_events/items/properties/entities/items": "CalendarEventsResponseCalendarEventEntity",
+    "list_calendar_events/response/properties/calendar_events/items/properties/sources/items": "CalendarEventsResponseCalendarEventSource",
+    "list_insights/response": "InsightsResponse",
+    "list_insights/response/properties/insights/items": "InsightsResponseInsight",
+    "list_insights/response/properties/insights/items/properties/entities/items": "InsightsResponseInsightEntity",
+    "get_insight_attention/response": "InsightAttentionResponse",
+    "get_insight_attention/response/properties/attention": "InsightAttentionResponseAttention",
+    "get_insight_attention/response/properties/attention/properties/buckets/items": "InsightAttentionResponseAttentionBucket",
+    "get_insight_attention/response/properties/attention/properties/cluster_mix/items": "InsightAttentionResponseAttentionClusterMixItem",
+    "get_insight_attention/response/properties/attention/properties/impact": "InsightAttentionResponseAttentionImpact",
+    "get_insight_attention/response/properties/attention/properties/impact/properties/vectors/items": "InsightAttentionResponseAttentionImpactVector",
+    "get_insight_attention/response/properties/price_reactions/items": "InsightAttentionResponsePriceReaction",
+    "get_insight_attention/response/properties/price_reactions/items/properties/moves/items": "InsightAttentionResponsePriceReactionMove",
+    "get_insight_attention/response/properties/price_reactions/items/properties/series/items": "InsightAttentionResponsePriceReactionSeriesPoint",
+    "list_assets/response": "ListAssetsResponse",
+    "list_assets/response/properties/assets/items": "ListAssetsResponseAsset",
+    "search/response": "SearchResponse",
+    "search/response/properties/results/items": "SearchResponseResult",
+    "list_subjects/response": "ListSubjectsResponse",
+    "list_subjects/response/properties/subjects/items": "ListSubjectsResponseSubject",
+    "get_price_history/response": "PriceHistoryResponse",
+    "get_price_history/response/properties/series/items": "PriceHistoryResponseSeriesPoint",
+    "get_calls/response": "CallsResponse",
+    "get_calls/response/properties/series/items": "CallsResponseSeriesPoint",
+    "get_call_returns/response": "CallReturnsResponse",
+    "get_call_returns/response/properties/buckets/items": "CallReturnsResponseBucket",
+    "get_conviction_index/response": "ConvictionIndexResponse",
+    "get_conviction_index/response/properties/series/items": "ConvictionIndexResponseSeriesPoint",
+    "get_fear_greed_index/response": "FearGreedIndexResponse",
+    "get_fear_greed_index/response/properties/current": "FearGreedIndexResponseCurrent",
+    "get_fear_greed_index/response/properties/metadata": "FearGreedIndexResponseMetadata",
+    "get_fear_greed_index/response/properties/metadata/properties/components/items": "FearGreedIndexResponseMetadataComponent",
+    "get_fear_greed_index/response/properties/series/items": "FearGreedIndexResponseSeriesPoint",
+    "get_price_levels/response": "PriceLevelsResponse",
+    "get_price_levels/response/properties/levels/items": "PriceLevelsResponseLevel",
+    "get_social_volume_index/response": "SocialVolumeIndexResponse",
+    "get_social_volume_index/response/properties/series/items": "SocialVolumeIndexResponseSeriesPoint",
+    "get_social_volume_profile/response": "SocialVolumeProfileResponse",
+    "get_social_volume_profile/response/properties/bins/items": "SocialVolumeProfileResponseBin",
+    "get_social_volume_profile/response/properties/metadata": "SocialVolumeProfileResponseMetadata",
+    "list_prediction_markets/response": "PredictionsResponse",
+    "list_prediction_markets/response/properties/markets/items": "PredictionMarketResponse",
+    "list_prediction_markets/response/properties/markets/items/properties/entities/items": "PredictionMarketResponseEntity",
+    "list_prediction_markets/response/properties/markets/items/properties/listings/items": "PredictionMarketResponseListing",
+    "list_prediction_markets/response/properties/markets/items/properties/listings/items/properties/outcomes/items": "PredictionMarketResponseListingOutcome",
+    "list_prediction_markets/response/properties/markets/items/properties/subjects/items": "PredictionMarketResponseSubject",
+    "get_prediction_history/response": "PredictionHistoryResponse",
+    "get_prediction_history/response/properties/points/items": "PredictionHistoryResponsePoint",
+    "get_prediction_history/response/properties/series/items": "PredictionHistoryResponseSeriesPoint",
+    "get_prediction_market/response": "PredictionMarketResponse",
+    "get_prediction_market/response/properties/entities/items": "PredictionMarketResponseEntity",
+    "get_prediction_market/response/properties/listings/items": "PredictionMarketResponseListing",
+    "get_prediction_market/response/properties/listings/items/properties/outcomes/items": "PredictionMarketResponseListingOutcome",
+    "get_prediction_market/response/properties/subjects/items": "PredictionMarketResponseSubject",
+    "get_emotions/response": "EmotionsResponse",
+    "get_emotions/response/properties/metadata": "EmotionsResponseMetadata",
+    "get_emotions/response/properties/series/additionalProperties/items": "EmotionsResponseSeriesEntry",
+    "get_mindshare/response": "MindshareResponse",
+    "get_mindshare/response/properties/series/items": "MindshareResponseSeriesPoint",
+    "get_related_subjects/response": "RelatedSubjectsResponse",
+    "get_related_subjects/response/properties/subjects/items": "RelatedSubjectsResponseSubject",
+    "get_sentiment/response": "SentimentResponse",
+    "get_sentiment/response/properties/cohorts/additionalProperties/items": "SentimentResponseCohortsEntry",
+    "get_sentiment/response/properties/series/items": "SentimentResponseCohortsEntry",
+    "get_sentiment_timeframes/response": "SentimentTimeframesResponse",
+    "get_sentiment_timeframes/response/properties/metadata": "SentimentTimeframesResponseMetadata",
+    "get_sentiment_timeframes/response/properties/series/additionalProperties/items": "SentimentTimeframesResponseSeriesEntry",
+    "get_social_momentum/response": "SocialMomentumResponse",
+    "get_social_momentum/response/properties/clusters/additionalProperties/items": "SocialMomentumResponseClustersEntry"
+  },
+  "scalars": {
+    "create_chat_completion/request/properties/messages/items/properties/role": "ChatRole",
+    "create_chat_completion/request/properties/thinking_mode": "ThinkingMode",
+    "list_clusters/query/asset_class": "AssetClass",
+    "compare_clusters/response/properties/clusters/items/properties/trending_asset/properties/asset_class": "AssetClass",
+    "compare_clusters/query/asset_class/items": "AssetClass",
+    "get_divisive_assets/response/properties/assets/items/properties/asset_class": "AssetClass",
+    "get_divisive_assets/query/asset_class/items": "AssetClass",
+    "compare_hype_cycles/response/properties/cycles/items/properties/asset_class": "AssetClass",
+    "compare_hype_cycles/query/asset_class/items": "AssetClass",
+    "compare_cluster_traits/query/asset_class/items": "AssetClass",
+    "get_cluster_hype_cycles/query/asset_class/items": "AssetClass",
+    "get_cluster_overlap/response/properties/peers/items/properties/shared_assets/items/properties/asset_class": "AssetClass",
+    "get_cluster_overlap/query/asset_class/items": "AssetClass",
+    "get_cluster_profile/query/asset_class/items": "AssetClass",
+    "get_cluster_rotation/response/properties/gainers/items/properties/asset_class": "AssetClass",
+    "get_cluster_rotation/response/properties/losers/items/properties/asset_class": "AssetClass",
+    "get_cluster_rotation/query/asset_class/items": "AssetClass",
+    "get_cluster_stances/response/properties/assets/items/properties/asset_class": "AssetClass",
+    "get_cluster_stances/query/asset_class/items": "AssetClass",
+    "screener/response/properties/asset_class": "AssetClass",
+    "screener/response/properties/kind": "Kind",
+    "screener/response/properties/results/items/properties/asset_class": "AssetClass",
+    "screener/response/properties/results/items/properties/kind": "Kind",
+    "screener/query/kind": "Kind",
+    "screener/query/asset_class": "AssetClass",
+    "screener/query/sort": "ScreenerSort",
+    "screener/query/order": "SortOrder",
+    "get_top_momentum/response/properties/asset_class": "AssetClass",
+    "get_top_momentum/response/properties/kind": "Kind",
+    "get_top_momentum/response/properties/results/items/properties/asset_class": "AssetClass",
+    "get_top_momentum/response/properties/results/items/properties/kind": "Kind",
+    "get_top_momentum/query/kind": "Kind",
+    "get_top_momentum/query/asset_class": "AssetClass",
+    "get_top_trending/response/properties/asset_class": "AssetClass",
+    "get_top_trending/response/properties/kind": "Kind",
+    "get_top_trending/response/properties/results/items/properties/asset_class": "AssetClass",
+    "get_top_trending/response/properties/results/items/properties/kind": "Kind",
+    "get_top_trending/query/kind": "Kind",
+    "get_top_trending/query/asset_class": "AssetClass",
+    "list_forecast_assets/response/properties/assets/items/properties/asset_class": "AssetClass",
+    "list_forecast_assets/query/asset_class": "AssetClass",
+    "get_mindshare_forecast/response/properties/reason": "ForecastReason",
+    "get_mindshare_forecast/response/properties/status": "ForecastStatus",
+    "get_sentiment_forecast/response/properties/reason": "ForecastReason",
+    "get_sentiment_forecast/response/properties/status": "ForecastStatus",
+    "list_calendar_events/response/properties/calendar_events/items/properties/entities/items/properties/asset_class": "AssetClass",
+    "list_calendar_events/response/properties/calendar_events/items/properties/sources/items/properties/provider": "PredictionProvider",
+    "list_calendar_events/query/domains/items": "CalendarDomain",
+    "list_calendar_events/query/event_types/items": "EventType",
+    "list_calendar_events/query/statuses/items": "EventStatus",
+    "list_insights/response/properties/insights/items/properties/entities/items/properties/asset_class": "AssetClass",
+    "list_insights/query/domains/items": "InsightDomain",
+    "list_insights/query/order_by": "InsightOrderBy",
+    "list_assets/response/properties/assets/items/properties/asset_class": "AssetClass",
+    "list_assets/query/asset_class": "AssetClass",
+    "search/response/properties/results/items/properties/asset_class": "AssetClass",
+    "search/response/properties/results/items/properties/kind": "Kind",
+    "search/query/kind": "Kind",
+    "get_price_history/query/granularity": "Granularity",
+    "get_conviction_index/query/granularity": "Granularity",
+    "get_fear_greed_index/query/granularity": "Granularity",
+    "list_prediction_markets/response/properties/markets/items/properties/entities/items/properties/asset_class": "AssetClass",
+    "list_prediction_markets/response/properties/markets/items/properties/listings/items/properties/provider": "PredictionProvider",
+    "list_prediction_markets/query/provider": "PredictionProvider",
+    "list_prediction_markets/query/status": "PredictionStatus",
+    "list_prediction_markets/query/asset_class": "AssetClass",
+    "get_prediction_market/response/properties/entities/items/properties/asset_class": "AssetClass",
+    "get_prediction_market/response/properties/listings/items/properties/provider": "PredictionProvider",
+    "get_emotions/response/properties/metadata/properties/granularity": "Granularity",
+    "get_emotions/query/granularity": "Granularity",
+    "get_mindshare/query/granularity": "Granularity",
+    "get_sentiment/query/asset_class": "AssetClass",
+    "get_sentiment/query/granularity": "Granularity",
+    "get_sentiment_timeframes/query/granularity": "Granularity",
+    "get_social_momentum/query/asset_class": "AssetClass",
+    "get_social_momentum/query/granularity": "Granularity"
+  },
+  "fields": {
+    "ClustersComparisonRequest.asset_class": "AssetClasses",
+    "DivisiveAssetsRequest.asset_class": "AssetClasses",
+    "ComparisonHypeCyclesRequest.asset_class": "AssetClasses",
+    "ComparisonTraitsRequest.asset_class": "AssetClasses",
+    "ClusterHypeCyclesRequest.asset_class": "AssetClasses",
+    "ClusterOverlapRequest.asset_class": "AssetClasses",
+    "ClusterProfileRequest.asset_class": "AssetClasses",
+    "ClusterRotationRequest.asset_class": "AssetClasses",
+    "ClusterStancesRequest.asset_class": "AssetClasses"
+  },
+  "enums": {
+    "ChatRole": {
+      "constants": {
+        "system": "ChatRoleSystem",
+        "developer": "ChatRoleDeveloper",
+        "user": "ChatRoleUser",
+        "assistant": "ChatRoleAssistant"
+      }
+    },
+    "ThinkingMode": {
+      "constants": {
+        "auto": "ThinkingModeAuto",
+        "deep": "ThinkingModeDeep"
+      }
+    },
+    "AssetClass": {
+      "constants": {
+        "equity": "AssetClassEquity",
+        "commodity": "AssetClassCommodity",
+        "index": "AssetClassIndex",
+        "crypto": "AssetClassCrypto"
+      }
+    },
+    "Kind": {
+      "constants": {
+        "asset": "KindAsset",
+        "subject": "KindSubject"
+      }
+    },
+    "ScreenerSort": {
+      "constants": {
+        "share": "ScreenerSortShare",
+        "share_change": "ScreenerSortShareChange",
+        "share_change_pct": "ScreenerSortShareChangePct",
+        "posts": "ScreenerSortPosts",
+        "net_bullish_posts": "ScreenerSortNetBullishPosts",
+        "price_change_24h_pct": "ScreenerSortPriceChange24hPct"
+      }
+    },
+    "SortOrder": {
+      "constants": {
+        "desc": "SortOrderDesc",
+        "asc": "SortOrderAsc"
+      }
+    },
+    "ForecastReason": {
+      "constants": {
+        "too_little_history": "ForecastReasonTooLittleHistory",
+        "stale_data": "ForecastReasonStaleData",
+        "missing_price": "ForecastReasonMissingPrice"
+      }
+    },
+    "ForecastStatus": {
+      "constants": {
+        "ok": "ForecastStatusOK",
+        "not_forecastable": "ForecastStatusNotForecastable"
+      }
+    },
+    "CalendarDomain": {
+      "constants": {
+        "crypto": "CalendarDomainCrypto",
+        "equities": "CalendarDomainEquities",
+        "commodities": "CalendarDomainCommodities",
+        "macro": "CalendarDomainMacro",
+        "politics": "CalendarDomainPolitics",
+        "technology": "CalendarDomainTechnology",
+        "prediction_markets": "CalendarDomainPredictionMarkets"
+      }
+    },
+    "EventType": {
+      "constants": {
+        "earnings": "EventTypeEarnings",
+        "guidance": "EventTypeGuidance",
+        "investor_day": "EventTypeInvestorDay",
+        "shareholder_meeting": "EventTypeShareholderMeeting",
+        "dividend": "EventTypeDividend",
+        "stock_split": "EventTypeStockSplit",
+        "buyback": "EventTypeBuyback",
+        "spin_off": "EventTypeSpinOff",
+        "acquisition": "EventTypeAcquisition",
+        "fundraising": "EventTypeFundraising",
+        "bankruptcy": "EventTypeBankruptcy",
+        "layoffs": "EventTypeLayoffs",
+        "partnership": "EventTypePartnership",
+        "appointment": "EventTypeAppointment",
+        "pricing_change": "EventTypePricingChange",
+        "clinical_trial": "EventTypeClinicalTrial",
+        "corporate_action": "EventTypeCorporateAction",
+        "ipo": "EventTypeIPO",
+        "listing": "EventTypeListing",
+        "delisting": "EventTypeDelisting",
+        "index_rebalance": "EventTypeIndexRebalance",
+        "contract_expiry": "EventTypeContractExpiry",
+        "market_holiday": "EventTypeMarketHoliday",
+        "etf": "EventTypeETF",
+        "economic_release": "EventTypeEconomicRelease",
+        "monetary_policy": "EventTypeMonetaryPolicy",
+        "central_bank_speech": "EventTypeCentralBankSpeech",
+        "budget": "EventTypeBudget",
+        "debt_auction": "EventTypeDebtAuction",
+        "trade_policy": "EventTypeTradePolicy",
+        "sanctions": "EventTypeSanctions",
+        "election": "EventTypeElection",
+        "referendum": "EventTypeReferendum",
+        "vote": "EventTypeVote",
+        "hearing": "EventTypeHearing",
+        "summit": "EventTypeSummit",
+        "treaty": "EventTypeTreaty",
+        "policy_deadline": "EventTypePolicyDeadline",
+        "regulatory_decision": "EventTypeRegulatoryDecision",
+        "regulatory_deadline": "EventTypeRegulatoryDeadline",
+        "filing_deadline": "EventTypeFilingDeadline",
+        "court_ruling": "EventTypeCourtRuling",
+        "legal": "EventTypeLegal",
+        "unlock": "EventTypeUnlock",
+        "burn": "EventTypeBurn",
+        "migration": "EventTypeMigration",
+        "snapshot": "EventTypeSnapshot",
+        "airdrop": "EventTypeAirdrop",
+        "token_sale": "EventTypeTokenSale",
+        "staking": "EventTypeStaking",
+        "halving": "EventTypeHalving",
+        "mainnet": "EventTypeMainnet",
+        "testnet": "EventTypeTestnet",
+        "fork": "EventTypeFork",
+        "upgrade": "EventTypeUpgrade",
+        "governance": "EventTypeGovernance",
+        "launch": "EventTypeLaunch",
+        "conference": "EventTypeConference",
+        "hackathon": "EventTypeHackathon",
+        "ama": "EventTypeAMA",
+        "competition": "EventTypeCompetition",
+        "prediction_market_resolution": "EventTypePredictionMarketResolution",
+        "deadline": "EventTypeDeadline",
+        "sports": "EventTypeSports",
+        "other": "EventTypeOther"
+      }
+    },
+    "EventStatus": {
+      "constants": {
+        "scheduled": "EventStatusScheduled",
+        "tentative": "EventStatusTentative",
+        "cancelled": "EventStatusCancelled",
+        "postponed": "EventStatusPostponed"
+      }
+    },
+    "InsightDomain": {
+      "constants": {
+        "crypto": "InsightDomainCrypto",
+        "equities": "InsightDomainEquities",
+        "commodities": "InsightDomainCommodities",
+        "macro": "InsightDomainMacro",
+        "politics": "InsightDomainPolitics",
+        "technology": "InsightDomainTechnology",
+        "sports": "InsightDomainSports",
+        "prediction_markets": "InsightDomainPredictionMarkets"
+      }
+    },
+    "InsightOrderBy": {
+      "constants": {
+        "start_time_asc": "InsightOrderByStartTimeAsc",
+        "start_time_desc": "InsightOrderByStartTimeDesc",
+        "updated_at_asc": "InsightOrderByUpdatedAtAsc",
+        "updated_at_desc": "InsightOrderByUpdatedAtDesc",
+        "created_at_asc": "InsightOrderByCreatedAtAsc",
+        "created_at_desc": "InsightOrderByCreatedAtDesc",
+        "importance_score_asc": "InsightOrderByImportanceScoreAsc",
+        "importance_score_desc": "InsightOrderByImportanceScoreDesc"
+      }
+    },
+    "Granularity": {
+      "constants": {
+        "1h": "Granularity1h",
+        "2h": "Granularity2h",
+        "4h": "Granularity4h",
+        "12h": "Granularity12h",
+        "1d": "Granularity1d"
+      }
+    },
+    "PredictionProvider": {
+      "constants": {
+        "polymarket": "PredictionProviderPolymarket",
+        "kalshi": "PredictionProviderKalshi"
+      }
+    },
+    "PredictionStatus": {
+      "constants": {
+        "open": "PredictionStatusOpen",
+        "closed": "PredictionStatusClosed",
+        "resolved": "PredictionStatusResolved",
+        "disputed": "PredictionStatusDisputed",
+        "all": "PredictionStatusAll"
+      }
+    }
+  },
+  "orders": {
+    "ChatCompletionRequest": [
+      "Messages",
+      "Model",
+      "ThinkingMode",
+      "Stream"
+    ],
+    "ChatMessage": [
+      "Role",
+      "Content"
+    ],
+    "ClustersRequest": [
+      "AssetClass",
+      "Hours"
+    ],
+    "ClustersComparisonRequest": [
+      "AssetClasses",
+      "Days"
+    ],
+    "DivisiveAssetsRequest": [
+      "AssetClasses",
+      "Days",
+      "Limit"
+    ],
+    "ComparisonHypeCyclesRequest": [
+      "AssetClasses",
+      "Days",
+      "Limit"
+    ],
+    "ComparisonTraitsRequest": [
+      "AssetClasses",
+      "Days"
+    ],
+    "ClusterHypeCyclesRequest": [
+      "ClusterID",
+      "AssetClasses",
+      "Days"
+    ],
+    "ClusterOverlapRequest": [
+      "ClusterID",
+      "AssetClasses",
+      "Days"
+    ],
+    "ClusterProfileRequest": [
+      "ClusterID",
+      "AssetClasses",
+      "Days"
+    ],
+    "ClusterRotationRequest": [
+      "ClusterID",
+      "AssetClasses",
+      "Hours",
+      "Limit"
+    ],
+    "ClusterStancesRequest": [
+      "ClusterID",
+      "AssetClasses",
+      "Days",
+      "Limit"
+    ],
+    "ScreenerRequest": [
+      "Kind",
+      "AssetClass",
+      "Clusters",
+      "Sort",
+      "Order",
+      "Limit",
+      "MinShare",
+      "MaxShare",
+      "MinShareChange",
+      "MaxShareChange",
+      "MinPosts",
+      "MinNetBullishPosts",
+      "MaxNetBullishPosts",
+      "MinPriceChange24hPct",
+      "MaxPriceChange24hPct"
+    ],
+    "TopMomentumRequest": [
+      "Kind",
+      "AssetClass",
+      "Clusters",
+      "Limit"
+    ],
+    "TopTrendingRequest": [
+      "Kind",
+      "AssetClass",
+      "Clusters",
+      "Limit"
+    ],
+    "ForecastAssetsRequest": [
+      "AssetClass",
+      "Limit",
+      "Offset"
+    ],
+    "MindshareForecastRequest": [
+      "Asset",
+      "Refresh"
+    ],
+    "SentimentForecastRequest": [
+      "Asset",
+      "Refresh"
+    ],
+    "CalendarEventsRequest": [
+      "Asset",
+      "Subject",
+      "Limit",
+      "Offset",
+      "StartTimeAfter",
+      "StartTimeBefore",
+      "Domains",
+      "EventTypes",
+      "Statuses",
+      "MinImportanceScore"
+    ],
+    "InsightsRequest": [
+      "Asset",
+      "Subject",
+      "Limit",
+      "Offset",
+      "StartTimeAfter",
+      "StartTimeBefore",
+      "Tags",
+      "ExcludeTags",
+      "Categories",
+      "Domains",
+      "OrderBy"
+    ],
+    "InsightAttentionRequest": [
+      "InsightID"
+    ],
+    "ListAssetsRequest": [
+      "Asset",
+      "AssetClass",
+      "Query",
+      "Limit",
+      "Offset"
+    ],
+    "SearchRequest": [
+      "Query",
+      "Kind",
+      "Limit"
+    ],
+    "ListSubjectsRequest": [
+      "Subject",
+      "Query",
+      "Limit",
+      "Offset"
+    ],
+    "PriceHistoryRequest": [
+      "Asset",
+      "Hours",
+      "Granularity"
+    ],
+    "CallsRequest": [
+      "Asset",
+      "Hours",
+      "Clusters"
+    ],
+    "CallReturnsRequest": [
+      "Asset",
+      "ResolvedDays",
+      "Clusters"
+    ],
+    "ConvictionIndexRequest": [
+      "Asset",
+      "Hours",
+      "Granularity"
+    ],
+    "FearGreedIndexRequest": [
+      "Asset",
+      "Hours",
+      "Granularity"
+    ],
+    "PriceLevelsRequest": [
+      "Asset",
+      "Hours"
+    ],
+    "SocialVolumeIndexRequest": [
+      "Asset",
+      "Hours"
+    ],
+    "SocialVolumeProfileRequest": [
+      "Asset",
+      "Hours",
+      "Bins",
+      "Clusters"
+    ],
+    "PredictionsRequest": [
+      "Asset",
+      "AssetClass",
+      "Subject",
+      "Query",
+      "Provider",
+      "Status",
+      "Limit",
+      "Offset"
+    ],
+    "PredictionHistoryRequest": [
+      "ListingID",
+      "OutcomeID",
+      "Hours"
+    ],
+    "PredictionMarketRequest": [
+      "MarketID"
+    ],
+    "EmotionsRequest": [
+      "Asset",
+      "Subject",
+      "Hours",
+      "Granularity"
+    ],
+    "MindshareRequest": [
+      "Asset",
+      "Subject",
+      "Hours",
+      "Granularity",
+      "Clusters"
+    ],
+    "RelatedSubjectsRequest": [
+      "Asset",
+      "Subject",
+      "Hours",
+      "Limit"
+    ],
+    "SentimentRequest": [
+      "Asset",
+      "AssetClass",
+      "Subject",
+      "Hours",
+      "Granularity",
+      "Clusters"
+    ],
+    "SentimentTimeframesRequest": [
+      "Asset",
+      "Subject",
+      "Hours",
+      "Granularity"
+    ],
+    "SocialMomentumRequest": [
+      "Asset",
+      "AssetClass",
+      "Subject",
+      "Hours",
+      "Granularity",
+      "Clusters"
+    ]
+  }
+}

@@ -1,7 +1,6 @@
 package nebula
 
 import (
-	"strings"
 	"time"
 )
 
@@ -49,29 +48,3 @@ func PredictionStatusPtr(v PredictionStatus) *PredictionStatus { return &v }
 
 // ThinkingModePtr returns a pointer to v for optional request fields.
 func ThinkingModePtr(v ThinkingMode) *ThinkingMode { return &v }
-
-// csvJoin serializes a form/explode=false array parameter as CSV.
-func csvJoin[S ~string](items []S) string {
-	parts := make([]string, len(items))
-	for i, s := range items {
-		parts[i] = string(s)
-	}
-	return strings.Join(parts, ",")
-}
-
-// minLTEPtr enforces "each minimum must not exceed its maximum".
-func minLTEPtr[T ~int | ~float64](lo, hi *T, op, loName, hiName string) error {
-	if lo != nil && hi != nil && *lo > *hi {
-		return &ValidationError{Op: op, Field: loName, Msg: loName + " must not exceed " + hiName}
-	}
-	return nil
-}
-
-func intIn(v int, allowed []int) bool {
-	for _, a := range allowed {
-		if v == a {
-			return true
-		}
-	}
-	return false
-}
