@@ -5,6 +5,12 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 
 ## [Unreleased]
 
+## [0.3.2] - 2026-11-15
+
+### Fixed
+- Install a supported Go toolchain before CodeQL initialization and use CodeQL v4 with an explicit build, required permissions and a job timeout.
+- Align Tests, lint and Coverage workflow Go versions with the SDK's Go 1.24 minimum; update the test matrix and Codecov upload condition.
+
 ## [0.3.1] - 2026-11-15
 
 ### Fixed
